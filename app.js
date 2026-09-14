@@ -44,6 +44,13 @@ const DISCIPLINES={
     {label:'Livello 1',thresholds:[10,20,25],hidden:'hyp'},
     {label:'Livello 2',thresholds:[10,20,25],hidden:'cat'}
   ]},
+  polygonFormulas:{title:'Formule · Poligoni',icon:'▱',sub:'Area e perimetro',color:'#0f8f73',oral:true,levels:[
+    {label:'Livello 1',thresholds:[10,20,25],shapes:['triangolo scaleno','triangolo isoscele','triangolo equilatero','triangolo rettangolo','quadrato','rombo','parallelogramma','trapezio scaleno','trapezio isoscele','trapezio rettangolo','rettangolo']},
+    {label:'Livello 2',thresholds:[10,20,25],shapes:['triangolo scaleno','triangolo isoscele','triangolo equilatero','triangolo rettangolo','quadrato','deltoide','rombo','parallelogramma','trapezio scaleno','trapezio isoscele','trapezio rettangolo','rettangolo','cerchio','esagono','pentagono']}
+  ]},
+  solidFormulas:{title:'Formule · Solidi',icon:'⬡',sub:'Aree e volume',color:'#3476b8',oral:true,levels:[
+    {label:'Livello 1',thresholds:[10,20,25],solids:['cubo','piramide','prisma retto','cilindro','cono','parallelepipedo']}
+  ]},
   fractionSums:{title:'Frazioni · Somma',icon:'½+',sub:'Somma e riduci',color:'#9b4db2',levels:[
     {label:'Livello 1',num:[0,5],den:[1,5],thresholds:[8,12,20],speedPenalties:[1,2,3]},
     {label:'Livello 2',num:[0,9],den:[1,10],thresholds:[12,16,24],speedPenalties:[1,2,3]}
@@ -100,6 +107,31 @@ function fractionText(num,den){return den===1?String(num):`${num}/${den}`}
 function fractionHtml(num,den){return `<span class="frac"><span class="num">${num}</span><span class="den">${den}</span></span>`}
 function cleanNumber(n){return Math.abs(n-Math.round(n))<1e-10?String(Math.round(n)):String(Math.round(n*10000)/10000).replace('.',',')}
 function perfectSqrtText(n){const r=Math.sqrt(n);return Number.isInteger(r)?String(r):`√${n}`}
+const POLYGON_FORMULAS={
+  'triangolo scaleno':{area:'A = (b × h) / 2',perimetro:'P = a + b + c'},
+  'triangolo isoscele':{area:'A = (b × h) / 2',perimetro:'P = b + 2l'},
+  'triangolo equilatero':{area:'A = (l² × √3) / 4',perimetro:'P = 3l'},
+  'triangolo rettangolo':{area:'A = (c₁ × c₂) / 2',perimetro:'P = c₁ + c₂ + i'},
+  'quadrato':{area:'A = l²',perimetro:'P = 4l'},
+  'deltoide':{area:'A = (D × d) / 2',perimetro:'P = 2(a + b)'},
+  'rombo':{area:'A = (D × d) / 2',perimetro:'P = 4l'},
+  'parallelogramma':{area:'A = b × h',perimetro:'P = 2(b + l)'},
+  'trapezio scaleno':{area:'A = ((B + b) × h) / 2',perimetro:'P = B + b + l₁ + l₂'},
+  'trapezio isoscele':{area:'A = ((B + b) × h) / 2',perimetro:'P = B + b + 2l'},
+  'trapezio rettangolo':{area:'A = ((B + b) × h) / 2',perimetro:'P = B + b + h + l'},
+  'rettangolo':{area:'A = b × h',perimetro:'P = 2(b + h)'},
+  'cerchio':{area:'A = πr²',perimetro:'C = 2πr'},
+  'esagono':{area:'A = (P × a) / 2',perimetro:'P = 6l'},
+  'pentagono':{area:'A = (P × a) / 2',perimetro:'P = 5l'}
+};
+const SOLID_FORMULAS={
+  'cubo':{'Area laterale':'Aₗ = 4l²','Area totale':'Aₜ = 6l²','Volume':'V = l³'},
+  'piramide':{'Area laterale':'Aₗ = (Pᵦ × a) / 2','Area totale':'Aₜ = Aₗ + Aᵦ','Volume':'V = (Aᵦ × h) / 3'},
+  'prisma retto':{'Area laterale':'Aₗ = Pᵦ × h','Area totale':'Aₜ = Aₗ + 2Aᵦ','Volume':'V = Aᵦ × h'},
+  'cilindro':{'Area laterale':'Aₗ = 2πrh','Area totale':'Aₜ = 2πr(r + h)','Volume':'V = πr²h'},
+  'cono':{'Area laterale':'Aₗ = πra','Area totale':'Aₜ = πr(a + r)','Volume':'V = (πr²h) / 3'},
+  'parallelepipedo':{'Area laterale':'Aₗ = 2h(a + b)','Area totale':'Aₜ = 2(ab + ah + bh)','Volume':'V = abh'}
+};
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
 
 function applyTheme(){
@@ -188,6 +220,15 @@ function buildQuestion(kind,level){
     const n1=randInt(...lv.num),d1=randInt(...lv.den),n2=randInt(...lv.num),d2=randInt(...lv.den),r=reduceFraction(n1*n2,d1*d2);
     return {html:`<span class="frac-expression">${fractionHtml(n1,d1)}<span class="frac-op">×</span>${fractionHtml(n2,d2)}</span>`,speak:`${n1} fratto ${d1}, per ${n2} fratto ${d2}`,fractionAnswer:r,correctText:fractionText(r.num,r.den),hint:'Moltiplica e scrivi il risultato ridotto ai minimi termini'};
   }
+  if(kind==='polygonFormulas'){
+    const shape=pick(lv.shapes),request=pick(['area','perimetro']),solution=POLYGON_FORMULAS[shape][request];
+    const label=request==='perimetro'&&shape==='cerchio'?'circonferenza':request;
+    return {html:`<span class="oral-formula-question">${label.toUpperCase()}<small>del</small>${esc(shape.toUpperCase())}</span>`,speak:`Formula ${label} del ${shape}`,hint:'Di’ la formula ad alta voce, poi premi “Ho risposto”',oral:true,correctText:solution,solution:`${label.charAt(0).toUpperCase()+label.slice(1)} del ${shape}: ${solution}`,teacherFormula:true};
+  }
+  if(kind==='solidFormulas'){
+    const solid=pick(lv.solids),request=pick(['Area laterale','Area totale','Volume']),solution=SOLID_FORMULAS[solid][request];
+    return {html:`<span class="oral-formula-question">${esc(request.toUpperCase())}<small>del</small>${esc(solid.toUpperCase())}</span>`,speak:`Formula ${request.toLowerCase()} del ${solid}`,hint:'Di’ la formula ad alta voce, poi premi “Ho risposto”',oral:true,correctText:solution,solution:`${request} del ${solid}: ${solution}`,teacherFormula:true};
+  }
   if(kind==='pythagoras'){
     if(level===0){
       const c1=randInt(1,10),c2=randInt(1,10),rad=c1*c1+c2*c2;
@@ -224,7 +265,7 @@ function startGame(kind,level){
 }
 function introFor(kind,level){
   const n=appState.currentAthlete;
-  const map={sums:'alleniamo le somme',tables:'ripassiamo le tabelline',multiplications:'affrontiamo le moltiplicazioni',squares:'eleviamo al quadrato',gcd:'calcoliamo il Massimo Comune Divisore',lcm:'calcoliamo il minimo comune multiplo',percent:'alleniamo le percentuali',segments:'affrontiamo i problemi sui segmenti',pythagoras:'alleniamo il Teorema di Pitagora',fractionSums:'sommiamo le frazioni',fractionProducts:'moltiplichiamo le frazioni'};
+  const map={sums:'alleniamo le somme',tables:'ripassiamo le tabelline',multiplications:'affrontiamo le moltiplicazioni',squares:'eleviamo al quadrato',gcd:'calcoliamo il Massimo Comune Divisore',lcm:'calcoliamo il minimo comune multiplo',percent:'alleniamo le percentuali',segments:'affrontiamo i problemi sui segmenti',pythagoras:'alleniamo il Teorema di Pitagora',polygonFormulas:'ripassiamo le formule dei poligoni',solidFormulas:'ripassiamo le formule dei solidi',fractionSums:'sommiamo le frazioni',fractionProducts:'moltiplichiamo le frazioni'};
   const lv=DISCIPLINES[kind].levels[level];
   return `${n}, ${map[kind]}. Livello ${lv.number??level+1}. Iniziamo!`;
 }
@@ -240,7 +281,8 @@ function nextQuestion(){
   els.questionText.innerHTML=game.question.html;
   els.solutionReveal.classList.add('hidden');els.solutionReveal.textContent='';
   if(game.question.oral){
-    els.visualArea.innerHTML=triangleSvg(game.question.triangle);els.visualArea.classList.remove('hidden');
+    if(game.question.triangle){els.visualArea.innerHTML=triangleSvg(game.question.triangle);els.visualArea.classList.remove('hidden')}
+    else{els.visualArea.classList.add('hidden');els.visualArea.innerHTML=''}
     els.answerForm.classList.add('hidden');els.oralControls.classList.remove('hidden');els.oralAnsweredBtn.classList.remove('hidden');els.teacherGrade.classList.add('hidden');
   }else{
     els.visualArea.classList.add('hidden');els.visualArea.innerHTML='';
@@ -302,7 +344,7 @@ function gradeCurrent(ok,sec){
   if(!game||game.locked)return;game.locked=true;stopQuestionClock();clearWarnings();
   game.responseTimes.push(sec);game.speedPenalty+=speedPenaltyFor(sec);
   if(ok){game.correct++;els.sollyGame.src='assets/solly/vittoria.png';els.gabbyGame.src='assets/gabby/sorpresa.png';els.feedbackLine.textContent='Ottimo!';tone('good');say('Ottimo!')}
-  else{game.wrong++;els.sollyGame.src='assets/solly/triste.png';els.gabbyGame.src='assets/gabby/triste.png';els.feedbackLine.textContent=`Non è corretto. Risposta: ${game.question.correctText}`;tone('bad');say(`Sbagliato. La risposta giusta è ${spokenCorrect(game.question.correctText)}`)}
+  else{game.wrong++;els.sollyGame.src='assets/solly/triste.png';els.gabbyGame.src='assets/gabby/triste.png';els.feedbackLine.textContent=`Non è corretto. Risposta: ${game.question.correctText}`;tone('bad');say(game.question.teacherFormula?'Non è corretto.':`Sbagliato. La risposta giusta è ${spokenCorrect(game.question.correctText)}`)}
   updateHUD();game.index++;
   setTimeout(()=>nextQuestion(),ok?650:1200);
 }
@@ -312,7 +354,8 @@ function oralAnswered(){
   game.oralFrozen=(performance.now()-game.qStart)/1000;stopQuestionClock();clearWarnings();
   els.oralAnsweredBtn.classList.add('hidden');els.teacherGrade.classList.remove('hidden');
   els.solutionReveal.textContent=`Soluzione: ${game.question.solution}`;els.solutionReveal.classList.remove('hidden');
-  els.feedbackLine.textContent='L’insegnante valuta la risposta.';say(`La risposta giusta era ${spokenCorrect(game.question.correctText)}`);
+  els.feedbackLine.textContent='L’insegnante valuta la risposta.';
+  if(!game.question.teacherFormula)say(`La risposta giusta era ${spokenCorrect(game.question.correctText)}`);
 }
 
 function finishGame(){
