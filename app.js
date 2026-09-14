@@ -73,7 +73,8 @@ const els={
   athleteModal:$('#athleteModal'),athleteForm:$('#athleteForm'),athleteInput:$('#athleteInput'),cancelAthleteBtn:$('#cancelAthleteBtn'),
   confirmModal:$('#confirmModal'),confirmText:$('#confirmText'),confirmNo:$('#confirmNo'),confirmYes:$('#confirmYes'),
   resultModal:$('#resultModal'),resultMascot:$('#resultMascot'),resultTitle:$('#resultTitle'),resultScore:$('#resultScore'),resultTime:$('#resultTime'),resultAvg:$('#resultAvg'),resultSpeed:$('#resultSpeed'),resultRecord:$('#resultRecord'),resultMessage:$('#resultMessage'),resultHomeBtn:$('#resultHomeBtn'),resultRetryBtn:$('#resultRetryBtn'),resultNextBtn:$('#resultNextBtn'),
-  infoModal:$('#infoModal'),closeInfoBtn:$('#closeInfoBtn')
+  infoModal:$('#infoModal'),closeInfoBtn:$('#closeInfoBtn'),
+  reorderModal:$('#reorderModal'),reorderTitle:$('#reorderTitle'),reorderText:$('#reorderText'),reorderOptions:$('#reorderOptions'),reorderEndBtn:$('#reorderEndBtn'),closeReorderBtn:$('#closeReorderBtn')
 };
 
 let appState=loadState();
@@ -82,12 +83,24 @@ let installPrompt=null;
 let timerRAF=0;
 let warningTimers=[];
 let audioCtx=null;
+let reorderSourceKind=null;
+let longPressTimer=0;
+let longPressStart=null;
+let suppressLevelClickUntil=0;
 
-function defaultState(){return {theme:'light',sound:true,currentAthlete:'',athletes:{}}}
+function defaultState(){return {theme:'light',sound:true,currentAthlete:'',athletes:{},disciplineOrder:Object.keys(DISCIPLINES)}}
 function loadState(){
   try{return {...defaultState(),...JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')}}catch{return defaultState()}
 }
 function saveState(){localStorage.setItem(STORAGE_KEY,JSON.stringify(appState))}
+function getDisciplineOrder(){
+  const valid=Object.keys(DISCIPLINES),seen=new Set(),saved=Array.isArray(appState.disciplineOrder)?appState.disciplineOrder:[];
+  const order=[];
+  saved.forEach(k=>{if(DISCIPLINES[k]&&!seen.has(k)){seen.add(k);order.push(k)}});
+  valid.forEach(k=>{if(!seen.has(k)){seen.add(k);order.push(k)}});
+  if(JSON.stringify(order)!==JSON.stringify(saved)){appState.disciplineOrder=order;saveState()}
+  return order;
+}
 function normName(s){return s.trim().replace(/\s+/g,' ').toLocaleLowerCase('it')}
 function athleteData(){
   const k=normName(appState.currentAthlete||'');
@@ -149,9 +162,10 @@ function renderAthlete(){
 function renderHome(){
   renderAthlete();
   els.grid.innerHTML='';
-  Object.entries(DISCIPLINES).forEach(([kind,d])=>{
+  getDisciplineOrder().forEach(kind=>{
+    const d=DISCIPLINES[kind];
     const card=document.createElement('article');
-    card.className='discipline-card';card.style.setProperty('--card-color',d.color);
+    card.className='discipline-card';card.dataset.kind=kind;card.style.setProperty('--card-color',d.color);
     const levels=d.levels.map((lv,i)=>{
       const r=getRecord(kind,i);
       const title=r?`Migliore: ${r.bestScore||0}/10${r.bestTime!=null?` – ${fmtTime(r.bestTime)}`:''}`:'Nessun risultato ancora';
@@ -160,6 +174,54 @@ function renderHome(){
     card.innerHTML=`<div class="disc-head"><div class="disc-icon">${d.icon}</div><div><div class="disc-title">${d.title}</div><div class="disc-sub">${d.sub}</div></div></div><div class="level-row">${levels}</div>`;
     els.grid.appendChild(card);
   });
+}
+
+
+function openReorderModal(kind){
+  if(!DISCIPLINES[kind])return;
+  reorderSourceKind=kind;
+  suppressLevelClickUntil=Date.now()+900;
+  const d=DISCIPLINES[kind];
+  els.reorderTitle.textContent=`Sposta “${d.title}”`;
+  els.reorderText.textContent='Scegli davanti a quale sezione inserirla.';
+  els.reorderOptions.innerHTML='';
+  getDisciplineOrder().filter(k=>k!==kind).forEach(target=>{
+    const td=DISCIPLINES[target],btn=document.createElement('button');
+    btn.type='button';btn.className='reorder-option';btn.dataset.target=target;
+    btn.style.setProperty('--target-color',td.color);
+    btn.innerHTML=`<span class="reorder-option-icon">${td.icon}</span><span><small>DAVANTI A</small><strong>${esc(td.title)}</strong></span>`;
+    els.reorderOptions.appendChild(btn);
+  });
+  els.reorderModal.classList.remove('hidden');
+  try{navigator.vibrate?.(35)}catch{}
+}
+function closeReorderModal(){
+  els.reorderModal.classList.add('hidden');
+  reorderSourceKind=null;
+}
+function moveDisciplineBefore(targetKind=null){
+  const source=reorderSourceKind;if(!source)return;
+  const order=getDisciplineOrder().filter(k=>k!==source);
+  if(targetKind&&order.includes(targetKind))order.splice(order.indexOf(targetKind),0,source);else order.push(source);
+  appState.disciplineOrder=order;saveState();closeReorderModal();renderHome();
+}
+function cancelLongPress(){
+  if(longPressTimer){clearTimeout(longPressTimer);longPressTimer=0}
+  if(longPressStart?.card)longPressStart.card.classList.remove('long-pressing');
+  longPressStart=null;
+}
+function beginLongPress(e){
+  const card=e.target.closest('.discipline-card');if(!card||e.button>0)return;
+  cancelLongPress();
+  longPressStart={card,x:e.clientX,y:e.clientY,pointerId:e.pointerId};
+  card.classList.add('long-pressing');
+  longPressTimer=setTimeout(()=>{
+    const kind=card.dataset.kind;cancelLongPress();openReorderModal(kind);
+  },600);
+}
+function trackLongPress(e){
+  if(!longPressStart||e.pointerId!==longPressStart.pointerId)return;
+  if(Math.hypot(e.clientX-longPressStart.x,e.clientY-longPressStart.y)>12)cancelLongPress();
 }
 
 function showScreen(which){
@@ -396,7 +458,17 @@ function toggleTheme(){appState.theme=appState.theme==='dark'?'light':'dark';sav
 function toggleSound(){appState.sound=!appState.sound;saveState();updateSound();if(!appState.sound)speechSynthesis?.cancel?.();else tone('good')}
 async function toggleFullscreen(){try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen();else await document.exitFullscreen()}catch{}}
 
-els.grid.addEventListener('click',e=>{const b=e.target.closest('.level-btn');if(b)startGame(b.dataset.kind,Number(b.dataset.level))});
+els.grid.addEventListener('click',e=>{if(Date.now()<suppressLevelClickUntil)return;const b=e.target.closest('.level-btn');if(b)startGame(b.dataset.kind,Number(b.dataset.level))});
+els.grid.addEventListener('pointerdown',beginLongPress);
+els.grid.addEventListener('pointermove',trackLongPress);
+els.grid.addEventListener('pointerup',cancelLongPress);
+els.grid.addEventListener('pointercancel',cancelLongPress);
+els.grid.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse')cancelLongPress()});
+els.grid.addEventListener('contextmenu',e=>{if(e.target.closest('.discipline-card'))e.preventDefault()});
+els.reorderOptions.addEventListener('click',e=>{const b=e.target.closest('.reorder-option');if(b)moveDisciplineBefore(b.dataset.target)});
+els.reorderEndBtn.addEventListener('click',()=>moveDisciplineBefore(null));
+els.closeReorderBtn.addEventListener('click',closeReorderModal);
+els.reorderModal.addEventListener('click',e=>{if(e.target===els.reorderModal)closeReorderModal()});
 els.answerForm.addEventListener('submit',e=>{e.preventDefault();submitAutomatic()});
 els.oralAnsweredBtn.addEventListener('click',oralAnswered);
 els.teacherCorrectBtn.addEventListener('click',()=>gradeCurrent(true,game?.oralFrozen??elapsed()));

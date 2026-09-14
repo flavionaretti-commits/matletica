@@ -43,7 +43,7 @@
         <div class="home-heading">
           <div>
             <h2>Scegli la specialità</h2>
-            <p>Ogni gara è composta da 10 prove.</p>
+            <p>Ogni gara è composta da 10 prove. <span class="reorder-hint">Tieni premuta una scheda per riordinare.</span></p>
           </div>
           <div class="legend"><span class="dot record-dot"></span> record personale</div>
         </div>
@@ -124,6 +124,17 @@
     </div>
   </div>
 
+  <div id="reorderModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="reorderTitle">
+    <div class="modal reorder-modal">
+      <button id="closeReorderBtn" class="modal-close" aria-label="Chiudi">×</button>
+      <div class="reorder-kicker">ORDINE DELLE SEZIONI</div>
+      <h2 id="reorderTitle">Sposta la sezione</h2>
+      <p id="reorderText">Scegli davanti a quale sezione inserirla.</p>
+      <div id="reorderOptions" class="reorder-options"></div>
+      <button id="reorderEndBtn" class="secondary-btn reorder-end" type="button">SPOSTA IN FONDO</button>
+    </div>
+  </div>
+
   <div id="resultModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
     <div class="modal result-modal">
       <img id="resultMascot" src="assets/solly/vittoria.png" alt="Solly" class="result-mascot">
@@ -154,7 +165,8 @@
       <div class="info-box"><strong>Modalità scuola</strong><br>Con <em>Nuovo Matleta</em> puoi cambiare rapidamente alunno senza cancellare i record già memorizzati per quel nome.</div>
       <div class="info-box"><strong>Prove orali</strong><br>Pitagora e le formule di poligoni e solidi si svolgono a voce: dopo “Ho risposto” compare la soluzione per l'insegnante, che assegna ✓ corretta oppure ✕ errata.</div>
       <p class="credits">Ideazione, prove e progetti Scratch originali: <strong>Flavio Naretti</strong>.<br>Trasposizione e sviluppo PWA realizzati con ChatGPT / OpenAI.</p>
-      <p class="version">MATLETICA v1.2</p>
+      <div class="info-box"><strong>Riordino delle sezioni</strong><br>Tieni premuta una scheda nella Home e scegli davanti a quale sezione inserirla. L’ordine resta memorizzato su questo dispositivo.</div>
+      <p class="version">MATLETICA v1.3</p>
     </div>
   </div>
 
