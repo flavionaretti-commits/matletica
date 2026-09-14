@@ -15,6 +15,10 @@ const DISCIPLINES={
     {label:'Livello 1',a:[2,5],b:[2,9],thresholds:[3,5,8],simple:true},
     {label:'Livello 2',a:[0,10],b:[0,10],thresholds:[2,4,7]}
   ]},
+  multiplications:{title:'Moltiplicazioni',icon:'××',sub:'Prodotti più impegnativi',color:'#b86618',levels:[
+    {label:'Livello 2',number:2,recordKey:'L2',a:[0,10],b:[10,99],thresholds:[5,9,14],speedPenalties:[0,1,3]},
+    {label:'Livello 3',number:3,recordKey:'L3',a:[11,99],b:[11,99],thresholds:[15,25,35],speedPenalties:[0,1,3]}
+  ]},
   squares:{title:'Quadrati',icon:'x²',sub:'Eleva al quadrato',color:'#7059c7',levels:[
     {label:'Livello 1',range:[0,20],thresholds:[20,25,33]},
     {label:'Livello 2',range:[11,99],thresholds:[20,25,33]}
@@ -22,6 +26,10 @@ const DISCIPLINES={
   gcd:{title:'MCD',icon:'M',sub:'Massimo Comune Divisore',color:'#2678c8',levels:[
     {label:'Livello 1',a:[1,10],b:[1,10],thresholds:[8,12,20]},
     {label:'Livello 2',a:[2,20],b:[2,25],thresholds:[8,12,20]}
+  ]},
+  lcm:{title:'mcm',icon:'m',sub:'Minimo comune multiplo',color:'#3f67b1',levels:[
+    {label:'Livello 1',range:[1,10],thresholds:[8,12,20],speedPenalties:[0,1,3]},
+    {label:'Livello 2',range:[1,20],thresholds:[8,12,20],speedPenalties:[0,1,3]}
   ]},
   percent:{title:'Percentuali',icon:'%',sub:'Percentuali a mente',color:'#cf4f83',levels:[
     {label:'Livello 1',thresholds:[5,9,14],p:[10,20,25,50,100,0],n:[100,1000,400,10,200,2000,4000]},
@@ -35,6 +43,14 @@ const DISCIPLINES={
   pythagoras:{title:'Pitagora',icon:'△',sub:'Teorema di Pitagora',color:'#178aa6',oral:true,levels:[
     {label:'Livello 1',thresholds:[10,20,25],hidden:'hyp'},
     {label:'Livello 2',thresholds:[10,20,25],hidden:'cat'}
+  ]},
+  fractionSums:{title:'Frazioni · Somma',icon:'½+',sub:'Somma e riduci',color:'#9b4db2',levels:[
+    {label:'Livello 1',num:[0,5],den:[1,5],thresholds:[8,12,20],speedPenalties:[1,2,3]},
+    {label:'Livello 2',num:[0,9],den:[1,10],thresholds:[12,16,24],speedPenalties:[1,2,3]}
+  ]},
+  fractionProducts:{title:'Frazioni · Moltiplica',icon:'½×',sub:'Moltiplica e riduci',color:'#7a53c7',levels:[
+    {label:'Livello 1',num:[1,5],den:[1,5],thresholds:[6,12,20],speedPenalties:[0,1,3]},
+    {label:'Livello 2',num:[1,10],den:[1,10],thresholds:[8,12,20],speedPenalties:[1,2,3]}
   ]}
 };
 
@@ -72,12 +88,16 @@ function athleteData(){
   if(!appState.athletes[k]) appState.athletes[k]={displayName:appState.currentAthlete,records:{},history:[]};
   return appState.athletes[k];
 }
-function recKey(kind,level){return `${kind}_${level}`}
+function recKey(kind,level){const lv=DISCIPLINES[kind]?.levels?.[level];return `${kind}_${lv?.recordKey??level}`}
 function getRecord(kind,level){return athleteData()?.records?.[recKey(kind,level)]||null}
 function fmtTime(sec){if(sec==null||!Number.isFinite(sec))return '—';return `${sec.toFixed(sec<10?1:0)} s`}
 function randInt(a,b){return Math.floor(Math.random()*(b-a+1))+a}
 function pick(arr){return arr[randInt(0,arr.length-1)]}
-function gcd(a,b){while(b){[a,b]=[b,a%b]}return Math.abs(a)}
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){[a,b]=[b,a%b]}return a}
+function lcm(a,b){return Math.abs(a*b)/gcd(a,b)}
+function reduceFraction(num,den){if(den<0){num=-num;den=-den}if(num===0)return {num:0,den:1};const g=gcd(num,den);return {num:num/g,den:den/g}}
+function fractionText(num,den){return den===1?String(num):`${num}/${den}`}
+function fractionHtml(num,den){return `<span class="frac"><span class="num">${num}</span><span class="den">${den}</span></span>`}
 function cleanNumber(n){return Math.abs(n-Math.round(n))<1e-10?String(Math.round(n)):String(Math.round(n*10000)/10000).replace('.',',')}
 function perfectSqrtText(n){const r=Math.sqrt(n);return Number.isInteger(r)?String(r):`√${n}`}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
@@ -103,7 +123,7 @@ function renderHome(){
     const levels=d.levels.map((lv,i)=>{
       const r=getRecord(kind,i);
       const title=r?`Migliore: ${r.bestScore||0}/10${r.bestTime!=null?` – ${fmtTime(r.bestTime)}`:''}`:'Nessun risultato ancora';
-      return `<button class="level-btn ${r?'has-record':''}" data-kind="${kind}" data-level="${i}" title="${title}">L${i+1}</button>`
+      return `<button class="level-btn ${r?'has-record':''}" data-kind="${kind}" data-level="${i}" title="${title}">L${lv.number??i+1}</button>`
     }).join('');
     card.innerHTML=`<div class="disc-head"><div class="disc-icon">${d.icon}</div><div><div class="disc-title">${d.title}</div><div class="disc-sub">${d.sub}</div></div></div><div class="level-row">${levels}</div>`;
     els.grid.appendChild(card);
@@ -141,17 +161,32 @@ function buildQuestion(kind,level){
   if(kind==='tables'){
     const a=randInt(...lv.a),b=randInt(...lv.b);return {html:`${a} × ${b}`,speak:`${a} per ${b}`,answer:a*b,correctText:String(a*b),hint:lv.simple?'Tabelline semplici':'Tabelline'};
   }
+  if(kind==='multiplications'){
+    const a=randInt(...lv.a),b=randInt(...lv.b);return {html:`${a} × ${b}`,speak:`${a} per ${b}`,answer:a*b,correctText:String(a*b),hint:'Moltiplica a mente'};
+  }
   if(kind==='squares'){
     const a=randInt(...lv.range);return {html:`${a}<sup>2</sup>`,speak:`${a} alla seconda`,answer:a*a,correctText:String(a*a),hint:'Eleva al quadrato'};
   }
   if(kind==='gcd'){
     const a=randInt(...lv.a),b=randInt(...lv.b),ans=gcd(a,b);return {html:`MCD(${a}, ${b})`,speak:`Massimo Comune Divisore tra ${a} e ${b}`,answer:ans,correctText:String(ans),hint:'Calcola il Massimo Comune Divisore'};
   }
+  if(kind==='lcm'){
+    const a=randInt(...lv.range),b=randInt(...lv.range),ans=lcm(a,b);return {html:`mcm(${a}, ${b})`,speak:`Minimo comune multiplo tra ${a} e ${b}`,answer:ans,correctText:String(ans),hint:'Calcola il minimo comune multiplo'};
+  }
   if(kind==='percent'){
     const p=pick(lv.p),n=pick(lv.n),ans=p*n/100;return {html:`${p}% <span class="of-word">di</span> ${n}`,speak:`${p} per cento di ${n}`,answer:ans,correctText:cleanNumber(ans),hint:'Calcola la percentuale'};
   }
   if(kind==='segments'){
     const a=randInt(...lv.range),b=randInt(...lv.range),sum=a+b,diff=Math.abs(a-b);return {html:`S = ${sum} &nbsp; D = ${diff}`,speak:`La somma vale ${sum}, la differenza vale ${diff}. Quanto misurano i due segmenti?`,answer:[a,b].sort((x,y)=>x-y),correctText:`${Math.min(a,b)} e ${Math.max(a,b)}`,hint:'Scrivi i due valori separati da uno spazio',segments:true};
+  }
+  if(kind==='fractionSums'){
+    const n1=randInt(...lv.num),d1=randInt(...lv.den),n2=randInt(...lv.num),d2=randInt(...lv.den);
+    const common=lcm(d1,d2),num=n1*(common/d1)+n2*(common/d2),r=reduceFraction(num,common);
+    return {html:`<span class="frac-expression">${fractionHtml(n1,d1)}<span class="frac-op">+</span>${fractionHtml(n2,d2)}</span>`,speak:`${n1} fratto ${d1}, più ${n2} fratto ${d2}`,fractionAnswer:r,correctText:fractionText(r.num,r.den),hint:'Somma e scrivi il risultato ridotto ai minimi termini'};
+  }
+  if(kind==='fractionProducts'){
+    const n1=randInt(...lv.num),d1=randInt(...lv.den),n2=randInt(...lv.num),d2=randInt(...lv.den),r=reduceFraction(n1*n2,d1*d2);
+    return {html:`<span class="frac-expression">${fractionHtml(n1,d1)}<span class="frac-op">×</span>${fractionHtml(n2,d2)}</span>`,speak:`${n1} fratto ${d1}, per ${n2} fratto ${d2}`,fractionAnswer:r,correctText:fractionText(r.num,r.den),hint:'Moltiplica e scrivi il risultato ridotto ai minimi termini'};
   }
   if(kind==='pythagoras'){
     if(level===0){
@@ -189,8 +224,9 @@ function startGame(kind,level){
 }
 function introFor(kind,level){
   const n=appState.currentAthlete;
-  const map={sums:'alleniamo le somme',tables:'ripassiamo le tabelline',squares:'eleviamo al quadrato',gcd:'calcoliamo il Massimo Comune Divisore',percent:'alleniamo le percentuali',segments:'affrontiamo i problemi sui segmenti',pythagoras:'alleniamo il Teorema di Pitagora'};
-  return `${n}, ${map[kind]}. Livello ${level+1}. Iniziamo!`;
+  const map={sums:'alleniamo le somme',tables:'ripassiamo le tabelline',multiplications:'affrontiamo le moltiplicazioni',squares:'eleviamo al quadrato',gcd:'calcoliamo il Massimo Comune Divisore',lcm:'calcoliamo il minimo comune multiplo',percent:'alleniamo le percentuali',segments:'affrontiamo i problemi sui segmenti',pythagoras:'alleniamo il Teorema di Pitagora',fractionSums:'sommiamo le frazioni',fractionProducts:'moltiplichiamo le frazioni'};
+  const lv=DISCIPLINES[kind].levels[level];
+  return `${n}, ${map[kind]}. Livello ${lv.number??level+1}. Iniziamo!`;
 }
 function resetMascots(){
   els.sollyGame.src='assets/solly/normal.png';els.gabbyGame.src='assets/gabby/normal.png';
@@ -209,7 +245,7 @@ function nextQuestion(){
   }else{
     els.visualArea.classList.add('hidden');els.visualArea.innerHTML='';
     els.answerForm.classList.remove('hidden');els.oralControls.classList.add('hidden');
-    els.answerInput.value='';els.answerInput.placeholder=game.question.segments?'es. 4 9':'Scrivi la risposta';
+    els.answerInput.value='';els.answerInput.placeholder=game.question.segments?'es. 4 9':game.question.fractionAnswer?'es. 3/4':'Scrivi la risposta';
     setTimeout(()=>els.answerInput.focus(),50);
   }
   updateHUD();
@@ -235,8 +271,8 @@ function scheduleWarnings(){
   },s*1000)));
 }
 function speedPenaltyFor(sec){
-  const [,slow,verySlow]=DISCIPLINES[game.kind].levels[game.level].thresholds;
-  if(sec>verySlow)return 3;if(sec>slow)return 1;return 0;
+  const lv=DISCIPLINES[game.kind].levels[game.level],th=lv.thresholds,pen=lv.speedPenalties||[0,1,3];
+  if(sec>th[2])return pen[2];if(sec>th[1])return pen[1];if(sec>th[0])return pen[0];return 0;
 }
 function speedScore(){return Math.max(0,10-game.speedPenalty)}
 function updateHUD(){
@@ -248,6 +284,12 @@ function parseAutomaticAnswer(raw,q){
   if(q.segments){
     const nums=s.replace(/,/g,'.').match(/-?\d+(?:\.\d+)?/g)?.map(Number)||[];
     if(nums.length<2)return false;const a=nums.slice(0,2).sort((x,y)=>x-y);return a[0]===q.answer[0]&&a[1]===q.answer[1];
+  }
+  if(q.fractionAnswer){
+    const compact=s.replace(/\s+/g,'');
+    if(q.fractionAnswer.den===1)return /^[-+]?\d+$/.test(compact)&&Number(compact)===q.fractionAnswer.num;
+    const m=compact.match(/^([-+]?\d+)\/([-+]?\d+)$/);if(!m)return false;
+    return Number(m[1])===q.fractionAnswer.num&&Number(m[2])===q.fractionAnswer.den;
   }
   const n=Number(s.replace(',','.'));if(!Number.isFinite(n))return false;return Math.abs(n-q.answer)<1e-9;
 }
@@ -264,7 +306,7 @@ function gradeCurrent(ok,sec){
   updateHUD();game.index++;
   setTimeout(()=>nextQuestion(),ok?650:1200);
 }
-function spokenCorrect(s){return String(s).replace('√','radice quadrata di ')}
+function spokenCorrect(s){return String(s).replace('√','radice quadrata di ').replace('/',' fratto ')}
 function oralAnswered(){
   if(!game||game.locked||!game.question.oral)return;
   game.oralFrozen=(performance.now()-game.qStart)/1000;stopQuestionClock();clearWarnings();
