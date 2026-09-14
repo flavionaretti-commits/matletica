@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#129c89">
+  <meta name="color-scheme" content="light dark">
+  <title>MATLETICA</title>
+  <meta name="description" content="Palestra di calcolo mentale: precisione, velocità e allenamento matematico.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <button class="icon-btn home-btn" id="homeBtn" title="Home" aria-label="Home">⌂</button>
+      <div class="brand-mini"><span class="brand-m">M</span><span>MATLETICA</span></div>
+      <div class="top-actions">
+        <button id="athleteBtn" class="athlete-btn" title="Cambia matleta"><span>👤</span><span id="athleteTopName">Nuovo matleta</span></button>
+        <button id="installBtn" class="icon-btn hidden" title="Installa MATLETICA" aria-label="Installa">⇩</button>
+        <button id="themeBtn" class="icon-btn" title="Giorno / Notte" aria-label="Giorno / Notte">☾</button>
+        <button id="soundBtn" class="icon-btn" title="Suoni e voce" aria-label="Suoni e voce">🔊</button>
+        <button id="fullscreenBtn" class="icon-btn" title="Schermo intero" aria-label="Schermo intero">⛶</button>
+        <button id="infoBtn" class="icon-btn" title="Informazioni" aria-label="Informazioni">i</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="homeScreen" class="screen home-screen active" aria-label="Home MATLETICA">
+        <div class="hero">
+          <img class="hero-sol hero-mascot" src="assets/solly/normal.png" alt="Solly">
+          <div class="hero-copy">
+            <div class="eyebrow">PALESTRA DI CALCOLO MENTALE</div>
+            <h1>MAT<span>LETICA</span></h1>
+            <p>Precisione. Velocità. Allenamento.</p>
+            <div class="welcome-pill">Matleta: <strong id="welcomeName">—</strong></div>
+          </div>
+          <img class="hero-gab hero-mascot" src="assets/gabby/normal.png" alt="Gabby">
+        </div>
+
+        <div class="home-heading">
+          <div>
+            <h2>Scegli la specialità</h2>
+            <p>Ogni gara è composta da 10 prove.</p>
+          </div>
+          <div class="legend"><span class="dot record-dot"></span> record personale</div>
+        </div>
+        <div id="disciplineGrid" class="discipline-grid"></div>
+      </section>
+
+      <section id="gameScreen" class="screen game-screen" aria-label="Esercitazione">
+        <div class="game-title-row">
+          <button id="backBtn" class="small-home">⌂ HOME</button>
+          <div class="game-title-block">
+            <div id="gameTitle" class="game-title">Somme</div>
+            <div id="gameLevel" class="game-level">Livello 1</div>
+          </div>
+          <div id="recordMini" class="record-mini">Record: —</div>
+        </div>
+
+        <div class="hud">
+          <div class="hud-item"><span>PROVA</span><strong id="hudProgress">1/10</strong></div>
+          <div class="hud-item ok"><span>CORRETTE</span><strong id="hudCorrect">0</strong></div>
+          <div class="hud-item no"><span>ERRORI</span><strong id="hudWrong">0</strong></div>
+          <div class="hud-item"><span>TEMPO</span><strong id="hudTime">0.0 s</strong></div>
+          <div class="hud-item speed"><span>VELOCITÀ</span><strong id="hudSpeed">10/10</strong></div>
+        </div>
+
+        <div class="arena">
+          <img id="sollyGame" class="game-mascot solly-game" src="assets/solly/normal.png" alt="Solly">
+          <img id="gabbyGame" class="game-mascot gabby-game" src="assets/gabby/normal.png" alt="Gabby">
+          <div id="speechBubble" class="speech-bubble hidden"></div>
+
+          <div class="question-card">
+            <div id="questionHint" class="question-hint"></div>
+            <div id="questionText" class="question-text">12 + 8</div>
+            <div id="visualArea" class="visual-area hidden"></div>
+            <div id="solutionReveal" class="solution-reveal hidden"></div>
+          </div>
+        </div>
+
+        <div id="answerArea" class="answer-area">
+          <form id="answerForm" class="answer-form" autocomplete="off">
+            <input id="answerInput" type="text" inputmode="decimal" enterkeyhint="done" aria-label="Risposta" placeholder="Scrivi la risposta" autocomplete="off">
+            <button class="primary-btn" type="submit">OK</button>
+          </form>
+          <div id="oralControls" class="oral-controls hidden">
+            <button id="oralAnsweredBtn" class="primary-btn wide">HO RISPOSTO</button>
+            <div id="teacherGrade" class="teacher-grade hidden">
+              <button id="teacherWrongBtn" class="grade-btn wrong">✕ ERRATA</button>
+              <button id="teacherCorrectBtn" class="grade-btn correct">✓ CORRETTA</button>
+            </div>
+          </div>
+        </div>
+        <div id="feedbackLine" class="feedback-line">Concentrati e… via!</div>
+      </section>
+    </main>
+  </div>
+
+  <div id="athleteModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="athleteTitle">
+    <div class="modal athlete-modal">
+      <img src="assets/solly/vittoria.png" alt="Solly" class="modal-sol">
+      <h2 id="athleteTitle">Come ti chiami, Matleta?</h2>
+      <p>Il nome resta attivo mentre passi da una specialità all'altra.</p>
+      <form id="athleteForm">
+        <input id="athleteInput" type="text" maxlength="28" placeholder="Nome" autocomplete="off" required>
+        <button class="primary-btn wide" type="submit">ENTRA IN PISTA</button>
+      </form>
+      <p class="privacy-note">I risultati e i record restano soltanto su questo dispositivo.</p>
+      <button id="cancelAthleteBtn" class="text-btn hidden" type="button">Annulla</button>
+    </div>
+  </div>
+
+  <div id="confirmModal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="modal compact-modal">
+      <h2>Nuovo Matleta?</h2>
+      <p id="confirmText">Vuoi terminare questa sessione e cambiare nome?</p>
+      <div class="modal-actions">
+        <button id="confirmNo" class="secondary-btn">ANNULLA</button>
+        <button id="confirmYes" class="primary-btn">SÌ, CAMBIA</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="resultModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+    <div class="modal result-modal">
+      <img id="resultMascot" src="assets/solly/vittoria.png" alt="Solly" class="result-mascot">
+      <div class="result-kicker">PRESTAZIONE COMPLETATA</div>
+      <h2 id="resultTitle">Grande gara!</h2>
+      <div class="score-ring"><strong id="resultScore">10</strong><span>/10</span></div>
+      <div class="result-grid">
+        <div><span>Tempo totale</span><strong id="resultTime">—</strong></div>
+        <div><span>Media / risposta</span><strong id="resultAvg">—</strong></div>
+        <div><span>Velocità</span><strong id="resultSpeed">—</strong></div>
+        <div><span>Record personale</span><strong id="resultRecord">—</strong></div>
+      </div>
+      <p id="resultMessage" class="result-message"></p>
+      <div class="modal-actions result-actions">
+        <button id="resultHomeBtn" class="secondary-btn">HOME</button>
+        <button id="resultRetryBtn" class="primary-btn">RIPROVA</button>
+        <button id="resultNextBtn" class="primary-btn accent hidden">LIVELLO SUCCESSIVO</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="infoModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
+    <div class="modal info-modal">
+      <button id="closeInfoBtn" class="modal-close" aria-label="Chiudi">×</button>
+      <h2 id="infoTitle">MATLETICA</h2>
+      <p><strong>MATLETICA</strong> riunisce in un'unica palestra le esercitazioni di calcolo mentale e rapido progettate originariamente in Scratch.</p>
+      <p>Ogni prova contiene 10 quesiti. Conta sia la precisione sia la rapidità: Solly e Gabby ti tengono d'occhio.</p>
+      <div class="info-box"><strong>Modalità scuola</strong><br>Con <em>Nuovo Matleta</em> puoi cambiare rapidamente alunno senza cancellare i record già memorizzati per quel nome.</div>
+      <div class="info-box"><strong>Pitagora</strong><br>La risposta è orale: dopo “Ho risposto” compare la soluzione e l'insegnante assegna ✓ corretta oppure ✕ errata.</div>
+      <p class="credits">Ideazione, prove e progetti Scratch originali: <strong>Flavio Naretti</strong>.<br>Trasposizione e sviluppo PWA realizzati con ChatGPT / OpenAI.</p>
+      <p class="version">MATLETICA v1.0</p>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
