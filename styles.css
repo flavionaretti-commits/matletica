@@ -34,7 +34,7 @@ body{min-height:100dvh;overscroll-behavior:none}button,input{font:inherit}button
 @media(max-width:430px){.discipline-grid{grid-template-columns:1fr 1fr}.hero-sol{display:none}.hero{grid-template-columns:1fr 90px}.hero-copy{text-align:left;padding-left:18px}.hero h1{font-size:39px}.home-screen{padding-left:8px;padding-right:8px}.disc-sub{display:none}.discipline-card{min-height:116px}.game-title{font-size:18px}.question-text{font-size:clamp(38px,12vw,64px)}.question-card{max-width:88%}.result-grid{grid-template-columns:1fr 1fr}}
 @media(max-height:620px){.game-screen.active{gap:4px;padding-top:4px}.game-title-row{min-height:32px}.game-title{font-size:18px}.game-level{font-size:9px}.hud-item{padding:2px 4px}.hud-item strong{font-size:14px}.arena{border-radius:18px}.question-text{font-size:clamp(36px,9vh,68px)}.question-hint{font-size:11px}.visual-area{height:min(155px,28vh)}.answer-area{min-height:47px}.answer-form input{padding:6px 10px}.feedback-line{font-size:9px}.solly-game{max-height:48%}.gabby-game{max-height:35%}}
 
-/* MATLETICA v1.3 — riordino sezioni con pressione prolungata */
+/* MATLETICA v1.5 — cronometro avviato solo dopo il rendering della domanda */
 .reorder-hint{font-weight:850;color:var(--primary)}
 .discipline-card{user-select:none;-webkit-user-select:none;transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease}
 .discipline-card.long-pressing{transform:scale(.985);border-color:var(--card-color);box-shadow:0 0 0 3px color-mix(in srgb,var(--card-color) 20%,transparent),0 9px 24px rgba(35,80,73,.11)}
