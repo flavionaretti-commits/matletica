@@ -7,57 +7,57 @@ const TOTAL_QUESTIONS=10;
 
 const DISCIPLINES={
   sums:{title:'Somme',icon:'+',sub:'Addizioni a mente',color:'#1f9d75',levels:[
-    {label:'Livello 1',range:[0,10],thresholds:[2,4,7]},
-    {label:'Livello 2',range:[0,50],thresholds:[2,4,7]},
-    {label:'Livello 3',range:[11,99],thresholds:[4,6,9]}
+    {label:'Livello 1',range:[0,10],thresholds:[2,4,7],warningWaits:[2,3,2],speedPenalties:[0,1,3]},
+    {label:'Livello 2',range:[0,50],thresholds:[2,4,7],warningWaits:[2,3,2],speedPenalties:[0,1,3]},
+    {label:'Livello 3',range:[11,99],thresholds:[4,6,9],warningWaits:[2,3,2],speedPenalties:[0,1,3]}
   ]},
   tables:{title:'Tabelline',icon:'×',sub:'Prodotti rapidi',color:'#e08124',levels:[
-    {label:'Livello 1',a:[2,5],b:[2,9],thresholds:[3,5,8],simple:true},
-    {label:'Livello 2',a:[0,10],b:[0,10],thresholds:[2,4,7]}
+    {label:'Livello 1',a:[2,5],b:[2,9],thresholds:[3,5,8],warningWaits:[2,3,2],speedPenalties:[1,2,3],simple:true},
+    {label:'Livello 2',a:[0,10],b:[0,10],thresholds:[2,4,7],warningWaits:[2,3,2],speedPenalties:[0,1,3]}
   ]},
   multiplications:{title:'Moltiplicazioni',icon:'××',sub:'Prodotti più impegnativi',color:'#b86618',levels:[
-    {label:'Livello 2',number:2,recordKey:'L2',a:[0,10],b:[10,99],thresholds:[5,9,14],speedPenalties:[0,1,3]},
-    {label:'Livello 3',number:3,recordKey:'L3',a:[11,99],b:[11,99],thresholds:[15,25,35],speedPenalties:[0,1,3]}
+    {label:'Livello 2',number:2,recordKey:'L2',a:[0,10],b:[10,99],thresholds:[5,9,14],warningWaits:[4,5,2],speedPenalties:[0,1,3]},
+    {label:'Livello 3',number:3,recordKey:'L3',a:[11,99],b:[11,99],thresholds:[15,25,35],warningWaits:[10,10,2],speedPenalties:[0,1,3]}
   ]},
   squares:{title:'Quadrati',icon:'x²',sub:'Eleva al quadrato',color:'#7059c7',levels:[
-    {label:'Livello 1',range:[0,20],thresholds:[20,25,33]},
-    {label:'Livello 2',range:[11,99],thresholds:[20,25,33]}
+    {label:'Livello 1',range:[0,20],thresholds:[20,25,33],warningWaits:[5,8,2],speedPenalties:[1,2,3]},
+    {label:'Livello 2',range:[11,99],thresholds:[20,25,33],warningWaits:[5,8,2],speedPenalties:[1,2,3]}
   ]},
   gcd:{title:'MCD',icon:'M',sub:'Massimo Comune Divisore',color:'#2678c8',levels:[
-    {label:'Livello 1',a:[1,10],b:[1,10],thresholds:[8,12,20]},
-    {label:'Livello 2',a:[2,20],b:[2,25],thresholds:[8,12,20]}
+    {label:'Livello 1',a:[1,10],b:[1,10],thresholds:[8,12,20],warningWaits:[4,8,2],speedPenalties:[0,1,3]},
+    {label:'Livello 2',a:[2,20],b:[2,25],thresholds:[8,12,20],warningWaits:[4,8,2],speedPenalties:[0,1,3]}
   ]},
   lcm:{title:'mcm',icon:'m',sub:'Minimo comune multiplo',color:'#3f67b1',levels:[
-    {label:'Livello 1',range:[1,10],thresholds:[8,12,20],speedPenalties:[0,1,3]},
-    {label:'Livello 2',range:[1,20],thresholds:[8,12,20],speedPenalties:[0,1,3]}
+    {label:'Livello 1',range:[1,10],thresholds:[8,12,20],warningWaits:[4,8,2],speedPenalties:[0,1,3]},
+    {label:'Livello 2',range:[1,20],thresholds:[8,12,20],warningWaits:[4,8,2],speedPenalties:[0,1,3]}
   ]},
   percent:{title:'Percentuali',icon:'%',sub:'Percentuali a mente',color:'#cf4f83',levels:[
-    {label:'Livello 1',thresholds:[5,9,14],p:[10,20,25,50,100,0],n:[100,1000,400,10,200,2000,4000]},
-    {label:'Livello 2',thresholds:[6,14,20],p:[10,20,25,50,5,30,60],n:[100,1000,400,10,200,2000,4000,150,300,1500,3000,50,500,30,60]},
-    {label:'Livello 3',thresholds:[8,18,25],p:[10,20,25,50,5,30,60,15,30,40,75,90,95,2,1],n:[100,1000,400,10,200,2000,4000,150,300,1500,3000,50,500,30,60,90,900,35,80]}
+    {label:'Livello 1',thresholds:[5,9,14],warningWaits:[4,5,2],speedPenalties:[0,1,3],p:[10,20,25,50,100,0],n:[100,1000,400,10,200,2000,4000]},
+    {label:'Livello 2',thresholds:[6,14,20],warningWaits:[8,6,2],speedPenalties:[0,1,3],p:[10,20,25,50,5,30,60],n:[100,1000,400,10,200,2000,4000,150,300,1500,3000,50,500,30,60]},
+    {label:'Livello 3',thresholds:[8,18,25],warningWaits:[10,7,2],speedPenalties:[0,1,3],p:[10,20,25,50,5,30,60,15,30,40,75,90,95,2,1],n:[100,1000,400,10,200,2000,4000,150,300,1500,3000,50,500,30,60,90,900,35,80]}
   ]},
   segments:{title:'Segmenti',icon:'↔',sub:'Somma e differenza',color:'#d5633b',levels:[
-    {label:'Livello 1',range:[1,10],thresholds:[8,10,15]},
-    {label:'Livello 2',range:[1,20],thresholds:[9,12,16]}
+    {label:'Livello 1',range:[1,10],thresholds:[8,10,15],warningWaits:[2,5,2],speedPenalties:[0,1,3]},
+    {label:'Livello 2',range:[1,20],thresholds:[9,12,16],warningWaits:[3,4,2],speedPenalties:[0,1,3]}
   ]},
   pythagoras:{title:'Pitagora',icon:'△',sub:'Teorema di Pitagora',color:'#178aa6',oral:true,levels:[
-    {label:'Livello 1',thresholds:[10,20,25],hidden:'hyp'},
-    {label:'Livello 2',thresholds:[10,20,25],hidden:'cat'}
+    {label:'Livello 1',thresholds:[10,20,25],warningWaits:[10,5,2],speedPenalties:[0,1,3],hidden:'hyp'},
+    {label:'Livello 2',thresholds:[10,20,25],warningWaits:[10,5,2],speedPenalties:[0,1,3],hidden:'cat'}
   ]},
   polygonFormulas:{title:'Formule · Poligoni',icon:'▱',sub:'Area e perimetro',color:'#0f8f73',oral:true,levels:[
-    {label:'Livello 1',thresholds:[10,20,25],shapes:['triangolo scaleno','triangolo isoscele','triangolo equilatero','triangolo rettangolo','quadrato','rombo','parallelogramma','trapezio scaleno','trapezio isoscele','trapezio rettangolo','rettangolo']},
-    {label:'Livello 2',thresholds:[10,20,25],shapes:['triangolo scaleno','triangolo isoscele','triangolo equilatero','triangolo rettangolo','quadrato','deltoide','rombo','parallelogramma','trapezio scaleno','trapezio isoscele','trapezio rettangolo','rettangolo','cerchio','esagono','pentagono']}
+    {label:'Livello 1',thresholds:[8,18,25],warningWaits:[10,7,2],speedPenalties:[0,1,3],shapes:['triangolo scaleno','triangolo isoscele','triangolo equilatero','triangolo rettangolo','quadrato','rombo','parallelogramma','trapezio scaleno','trapezio isoscele','trapezio rettangolo','rettangolo']},
+    {label:'Livello 2',thresholds:[8,18,25],warningWaits:[10,7,2],speedPenalties:[0,1,3],shapes:['triangolo scaleno','triangolo isoscele','triangolo equilatero','triangolo rettangolo','quadrato','deltoide','rombo','parallelogramma','trapezio scaleno','trapezio isoscele','trapezio rettangolo','rettangolo','cerchio','esagono','pentagono']}
   ]},
   solidFormulas:{title:'Formule · Solidi',icon:'⬡',sub:'Aree e volume',color:'#3476b8',oral:true,levels:[
-    {label:'Livello 1',thresholds:[10,20,25],solids:['cubo','piramide','prisma retto','cilindro','cono','parallelepipedo']}
+    {label:'Livello 1',thresholds:[8,18,25],warningWaits:[10,7,2],speedPenalties:[0,1,3],solids:['cubo','piramide','prisma retto','cilindro','cono','parallelepipedo']}
   ]},
   fractionSums:{title:'Frazioni · Somma',icon:'½+',sub:'Somma e riduci',color:'#9b4db2',levels:[
-    {label:'Livello 1',num:[0,5],den:[1,5],thresholds:[8,12,20],speedPenalties:[1,2,3]},
-    {label:'Livello 2',num:[0,9],den:[1,10],thresholds:[12,16,24],speedPenalties:[1,2,3]}
+    {label:'Livello 1',num:[0,5],den:[1,5],thresholds:[8,12,20],warningWaits:[4,8,2],speedPenalties:[1,2,3]},
+    {label:'Livello 2',num:[0,9],den:[1,10],thresholds:[12,16,24],warningWaits:[4,8,2],speedPenalties:[1,2,3]}
   ]},
   fractionProducts:{title:'Frazioni · Moltiplica',icon:'½×',sub:'Moltiplica e riduci',color:'#7a53c7',levels:[
-    {label:'Livello 1',num:[1,5],den:[1,5],thresholds:[6,12,20],speedPenalties:[0,1,3]},
-    {label:'Livello 2',num:[1,10],den:[1,10],thresholds:[8,12,20],speedPenalties:[1,2,3]}
+    {label:'Livello 1',num:[1,5],den:[1,5],thresholds:[6,12,20],warningWaits:[6,8,2],speedPenalties:[0,1,3]},
+    {label:'Livello 2',num:[1,10],den:[1,10],thresholds:[8,12,20],warningWaits:[4,8,2],speedPenalties:[1,2,3]}
   ]}
 };
 
@@ -81,7 +81,11 @@ let appState=loadState();
 let game=null;
 let installPrompt=null;
 let timerRAF=0;
+let questionStartRAF1=0;
+let questionStartRAF2=0;
+let questionStartToken=0;
 let warningTimers=[];
+let warningRunId=0;
 let audioCtx=null;
 let reorderSourceKind=null;
 let longPressTimer=0;
@@ -227,7 +231,7 @@ function trackLongPress(e){
 function showScreen(which){
   els.homeScreen.classList.toggle('active',which==='home');
   els.gameScreen.classList.toggle('active',which==='game');
-  if(which==='home'){stopQuestionClock();clearWarnings();speechSynthesis?.cancel?.();renderHome()}
+  if(which==='home'){cancelPendingQuestionStart();stopQuestionClock();clearWarnings();speechSynthesis?.cancel?.();renderHome()}
 }
 
 function openAthleteModal(canCancel=!!appState.currentAthlete){
@@ -315,15 +319,24 @@ function triangleSvg(t){
 
 function startGame(kind,level){
   if(!appState.currentAthlete){openAthleteModal(false);return}
+  cancelPendingQuestionStart();stopQuestionClock();clearWarnings();
   const d=DISCIPLINES[kind],lv=d.levels[level];
-  game={kind,level,index:0,correct:0,wrong:0,responseTimes:[],speedPenalty:0,question:null,qStart:0,locked:false,oralFrozen:null};
+  game={kind,level,index:0,correct:0,wrong:0,responseTimes:[],speedPenalty:0,question:null,qStart:0,locked:false,oralFrozen:null,currentWarningLevel:-1,questionReady:false};
   els.gameTitle.textContent=d.title;els.gameLevel.textContent=lv.label;
   const rec=getRecord(kind,level);els.recordMini.textContent=`Record: ${rec?.bestTime!=null?fmtTime(rec.bestTime):'—'}`;
   showScreen('game');
   resetMascots();
+  els.questionHint.textContent='';
+  els.questionText.innerHTML='';
+  els.visualArea.classList.add('hidden');els.visualArea.innerHTML='';
+  els.solutionReveal.classList.add('hidden');els.solutionReveal.textContent='';
+  els.answerForm.classList.add('hidden');els.oralControls.classList.add('hidden');
+  els.hudTime.textContent='0.0 s';
   els.feedbackLine.textContent=`${appState.currentAthlete}, concentrati e… via!`;
-  say(introFor(kind,level));
-  nextQuestion();
+  const thisGame=game;
+  sayAsync(introFor(kind,level)).then(()=>{
+    if(game===thisGame&&els.gameScreen.classList.contains('active'))nextQuestion();
+  });
 }
 function introFor(kind,level){
   const n=appState.currentAthlete;
@@ -337,7 +350,8 @@ function resetMascots(){
 }
 function nextQuestion(){
   if(!game||game.index>=TOTAL_QUESTIONS){finishGame();return}
-  game.locked=false;game.oralFrozen=null;resetMascots();clearWarnings();
+  cancelPendingQuestionStart();
+  game.locked=false;game.oralFrozen=null;game.currentWarningLevel=-1;game.questionReady=false;resetMascots();clearWarnings();
   game.question=buildQuestion(game.kind,game.level);
   els.questionHint.textContent=game.question.hint||'';
   els.questionText.innerHTML=game.question.html;
@@ -353,30 +367,82 @@ function nextQuestion(){
     setTimeout(()=>els.answerInput.focus(),50);
   }
   updateHUD();
-  startQuestionClock();scheduleWarnings();
-  say(game.question.speak);
+  els.hudTime.textContent='0.0 s';
+  startQuestionAfterRender();
 }
 
+function cancelPendingQuestionStart(){
+  questionStartToken++;
+  if(questionStartRAF1)cancelAnimationFrame(questionStartRAF1);
+  if(questionStartRAF2)cancelAnimationFrame(questionStartRAF2);
+  questionStartRAF1=0;questionStartRAF2=0;
+}
+function startQuestionAfterRender(){
+  const token=++questionStartToken;
+  // Due frame: il primo applica il DOM, il secondo garantisce che la domanda sia già visibile.
+  questionStartRAF1=requestAnimationFrame(()=>{
+    questionStartRAF1=0;
+    questionStartRAF2=requestAnimationFrame(()=>{
+      questionStartRAF2=0;
+      if(token!==questionStartToken||!game||game.locked||!els.gameScreen.classList.contains('active'))return;
+      game.questionReady=true;
+      startQuestionClock();
+      scheduleWarnings();
+      say(game.question.speak);
+    });
+  });
+}
 function startQuestionClock(){
   stopQuestionClock();game.qStart=performance.now();
-  const tick=()=>{if(!game||game.locked)return;const s=(performance.now()-game.qStart)/1000;els.hudTime.textContent=`${s.toFixed(1)} s`;timerRAF=requestAnimationFrame(tick)};tick();
+  const tick=()=>{if(!game||game.locked||!game.questionReady)return;const s=(performance.now()-game.qStart)/1000;els.hudTime.textContent=`${s.toFixed(1)} s`;timerRAF=requestAnimationFrame(tick)};tick();
 }
 function stopQuestionClock(){if(timerRAF)cancelAnimationFrame(timerRAF);timerRAF=0}
 function elapsed(){return game?.oralFrozen??((performance.now()-game.qStart)/1000)}
-function clearWarnings(){warningTimers.forEach(clearTimeout);warningTimers=[]}
-function scheduleWarnings(){
-  const th=DISCIPLINES[game.kind].levels[game.level].thresholds;
-  const messages=['Sbrigati!','Sei proprio una lumaca!','Tempo… corri!'];
-  th.forEach((s,i)=>warningTimers.push(setTimeout(()=>{
-    if(!game||game.locked)return;
+function clearWarnings(){
+  warningRunId++;
+  warningTimers.forEach(clearTimeout);warningTimers=[];
+  if('speechSynthesis'in window){try{speechSynthesis.cancel()}catch{}}
+}
+function warningDelay(ms,token){
+  return new Promise(resolve=>{
+    const id=setTimeout(()=>resolve(token===warningRunId),Math.max(0,ms));
+    warningTimers.push(id);
+  });
+}
+function sayWarning(text,token){
+  if(!appState.sound||!('speechSynthesis'in window)||!text)return Promise.resolve(token===warningRunId);
+  return new Promise(resolve=>{
+    try{
+      const u=new SpeechSynthesisUtterance(text);u.lang='it-IT';u.rate=1.03;
+      const voices=speechSynthesis.getVoices();const it=voices.find(v=>v.lang?.toLowerCase().startsWith('it'));if(it)u.voice=it;
+      u.onend=u.onerror=()=>resolve(token===warningRunId);
+      speechSynthesis.speak(u);
+    }catch{resolve(token===warningRunId)}
+  });
+}
+async function scheduleWarnings(){
+  const token=warningRunId;
+  const lv=DISCIPLINES[game.kind].levels[game.level];
+  const th=lv.thresholds||[],waits=lv.warningWaits||[0,0,0];
+  const messages=['Sbrigati!','Sei proprio una lumaca!','Zzz…'];
+  for(let i=0;i<th.length;i++){
+    // Scratch confronta un contatore intero con “> soglia”: >3 scatta quando arriva a 4.
+    const target=th[i]+1;
+    const remaining=Math.max(0,target-elapsed());
+    if(!(await warningDelay(remaining*1000,token))||!game||game.locked)return;
+    game.currentWarningLevel=i;
     els.speechBubble.textContent=messages[i];els.speechBubble.classList.remove('hidden');
     els.gabbyGame.src=i===0?'assets/gabby/sorpresa.png':i===1?'assets/gabby/arrabbiata.png':'assets/gabby/congelata.png';
-    say(messages[i]);
-  },s*1000)));
+    // Nei progetti Scratch i primi due avvisi usano “pronuncia e attendi”; il terzo è il suono ZZZ.
+    if(i<2){if(!(await sayWarning(messages[i],token))||!game||game.locked)return}
+    else tone('bad');
+    if(!(await warningDelay((waits[i]||0)*1000,token))||!game||game.locked)return;
+  }
 }
-function speedPenaltyFor(sec){
-  const lv=DISCIPLINES[game.kind].levels[game.level],th=lv.thresholds,pen=lv.speedPenalties||[0,1,3];
-  if(sec>th[2])return pen[2];if(sec>th[1])return pen[1];if(sec>th[0])return pen[0];return 0;
+function speedPenaltyForWarning(){
+  const lv=DISCIPLINES[game.kind].levels[game.level],pen=lv.speedPenalties||[0,1,3];
+  const i=game.currentWarningLevel??-1;
+  return i<0?0:(pen[i]??0);
 }
 function speedScore(){return Math.max(0,10-game.speedPenalty)}
 function updateHUD(){
@@ -398,13 +464,13 @@ function parseAutomaticAnswer(raw,q){
   const n=Number(s.replace(',','.'));if(!Number.isFinite(n))return false;return Math.abs(n-q.answer)<1e-9;
 }
 function submitAutomatic(){
-  if(!game||game.locked||game.question.oral)return;
+  if(!game||game.locked||!game.questionReady||game.question.oral)return;
   const raw=els.answerInput.value;if(!raw.trim())return;
   const ok=parseAutomaticAnswer(raw,game.question);gradeCurrent(ok,elapsed());
 }
 function gradeCurrent(ok,sec){
-  if(!game||game.locked)return;game.locked=true;stopQuestionClock();clearWarnings();
-  game.responseTimes.push(sec);game.speedPenalty+=speedPenaltyFor(sec);
+  if(!game||game.locked||!game.questionReady)return;game.locked=true;cancelPendingQuestionStart();stopQuestionClock();clearWarnings();
+  game.responseTimes.push(sec);game.speedPenalty+=speedPenaltyForWarning();
   if(ok){game.correct++;els.sollyGame.src='assets/solly/vittoria.png';els.gabbyGame.src='assets/gabby/sorpresa.png';els.feedbackLine.textContent='Ottimo!';tone('good');say('Ottimo!')}
   else{game.wrong++;els.sollyGame.src='assets/solly/triste.png';els.gabbyGame.src='assets/gabby/triste.png';els.feedbackLine.textContent=`Non è corretto. Risposta: ${game.question.correctText}`;tone('bad');say(game.question.teacherFormula?'Non è corretto.':`Sbagliato. La risposta giusta è ${spokenCorrect(game.question.correctText)}`)}
   updateHUD();game.index++;
@@ -412,7 +478,7 @@ function gradeCurrent(ok,sec){
 }
 function spokenCorrect(s){return String(s).replace('√','radice quadrata di ').replace('/',' fratto ')}
 function oralAnswered(){
-  if(!game||game.locked||!game.question.oral)return;
+  if(!game||game.locked||!game.questionReady||!game.question.oral)return;
   game.oralFrozen=(performance.now()-game.qStart)/1000;stopQuestionClock();clearWarnings();
   els.oralAnsweredBtn.classList.add('hidden');els.teacherGrade.classList.remove('hidden');
   els.solutionReveal.textContent=`Soluzione: ${game.question.solution}`;els.solutionReveal.classList.remove('hidden');
@@ -421,7 +487,7 @@ function oralAnswered(){
 }
 
 function finishGame(){
-  stopQuestionClock();clearWarnings();
+  cancelPendingQuestionStart();stopQuestionClock();clearWarnings();
   const total=game.responseTimes.reduce((a,b)=>a+b,0),avg=total/(game.responseTimes.length||1),score=game.correct,speed=speedScore();
   const data=athleteData(),key=recKey(game.kind,game.level);let rec=data.records[key]||{bestScore:0,bestTime:null,bestAvg:null,bestSpeed:0};
   rec.bestScore=Math.max(rec.bestScore||0,score);rec.bestSpeed=Math.max(rec.bestSpeed||0,speed);
@@ -440,6 +506,17 @@ function finishGame(){
 }
 
 function showBubble(msg,ms=1500){els.speechBubble.textContent=msg;els.speechBubble.classList.remove('hidden');setTimeout(()=>els.speechBubble.classList.add('hidden'),ms)}
+function sayAsync(text){
+  if(!appState.sound||!('speechSynthesis'in window)||!text)return Promise.resolve();
+  return new Promise(resolve=>{
+    try{
+      speechSynthesis.cancel();
+      const u=new SpeechSynthesisUtterance(text);u.lang='it-IT';u.rate=1.03;
+      const voices=speechSynthesis.getVoices();const it=voices.find(v=>v.lang?.toLowerCase().startsWith('it'));if(it)u.voice=it;
+      u.onend=u.onerror=()=>resolve();speechSynthesis.speak(u);
+    }catch{resolve()}
+  });
+}
 function say(text){
   if(!appState.sound||!('speechSynthesis'in window)||!text)return;
   try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='it-IT';u.rate=1.03;const voices=speechSynthesis.getVoices();const it=voices.find(v=>v.lang?.toLowerCase().startsWith('it'));if(it)u.voice=it;speechSynthesis.speak(u)}catch{}
