@@ -62,10 +62,10 @@
 
         <div class="hud">
           <div class="hud-item"><span>PROVA</span><strong id="hudProgress">1/10</strong></div>
-          <div class="hud-item ok"><span>CORRETTE</span><strong id="hudCorrect">0</strong></div>
-          <div class="hud-item no"><span>ERRORI</span><strong id="hudWrong">0</strong></div>
+          <div class="hud-item ok"><span id="hudCorrectLabel">CORRETTE</span><strong id="hudCorrect">0</strong></div>
+          <div class="hud-item no"><span id="hudWrongLabel">ERRORI</span><strong id="hudWrong">0</strong></div>
           <div class="hud-item"><span>TEMPO</span><strong id="hudTime">0.0 s</strong></div>
-          <div class="hud-item speed"><span>VELOCITÀ</span><strong id="hudSpeed">10/10</strong></div>
+          <div class="hud-item speed"><span id="hudSpeedLabel">VELOCITÀ</span><strong id="hudSpeed">10/10</strong></div>
         </div>
 
         <div class="arena">
@@ -135,17 +135,35 @@
     </div>
   </div>
 
+  <div id="criteriaModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="criteriaTitle">
+    <div class="modal criteria-modal">
+      <button id="closeCriteriaBtn" class="modal-close" aria-label="Chiudi">×</button>
+      <div class="result-kicker">RIPASSO RAPIDO</div>
+      <h2 id="criteriaTitle">Criteri di divisibilità</h2>
+      <p>Puoi consultare questa scheda dalla Home. Durante la gara non vengono mostrati suggerimenti.</p>
+      <div class="criteria-grid">
+        <div><strong>2</strong><span>L’ultima cifra è pari: 0, 2, 4, 6 oppure 8.</span></div>
+        <div><strong>3</strong><span>La somma delle cifre è un multiplo di 3.</span></div>
+        <div><strong>5</strong><span>L’ultima cifra è 0 oppure 5.</span></div>
+        <div><strong>7</strong><span>Togli l’ultima cifra, raddoppiala e sottraila dal numero rimasto. Ripeti se serve.</span></div>
+        <div><strong>11</strong><span>La differenza tra le somme delle cifre in posizione alternata è 0 o un multiplo di 11.</span></div>
+        <div><strong>13</strong><span>Togli l’ultima cifra, moltiplicala per 4 e aggiungila al numero rimasto. Ripeti se serve.</span></div>
+        <div><strong>17</strong><span>Togli l’ultima cifra, moltiplicala per 5 e sottraila dal numero rimasto. Ripeti se serve.</span></div>
+      </div>
+    </div>
+  </div>
+
   <div id="resultModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
     <div class="modal result-modal">
       <img id="resultMascot" src="assets/solly/vittoria.png" alt="Solly" class="result-mascot">
       <div class="result-kicker">PRESTAZIONE COMPLETATA</div>
       <h2 id="resultTitle">Grande gara!</h2>
-      <div class="score-ring"><strong id="resultScore">10</strong><span>/10</span></div>
+      <div class="score-ring" id="resultScoreRing"><strong id="resultScore">10</strong><span id="resultScoreMax">/10</span></div>
       <div class="result-grid">
-        <div><span>Tempo totale</span><strong id="resultTime">—</strong></div>
-        <div><span>Media / risposta</span><strong id="resultAvg">—</strong></div>
-        <div><span>Velocità</span><strong id="resultSpeed">—</strong></div>
-        <div><span>Record personale</span><strong id="resultRecord">—</strong></div>
+        <div><span id="resultTimeLabel">Tempo totale</span><strong id="resultTime">—</strong></div>
+        <div><span id="resultAvgLabel">Media / risposta</span><strong id="resultAvg">—</strong></div>
+        <div><span id="resultSpeedLabel">Velocità</span><strong id="resultSpeed">—</strong></div>
+        <div><span id="resultRecordLabel">Record personale</span><strong id="resultRecord">—</strong></div>
       </div>
       <p id="resultMessage" class="result-message"></p>
       <div class="modal-actions result-actions">
@@ -164,9 +182,10 @@
       <p>Ogni prova contiene 10 quesiti. Conta sia la precisione sia la rapidità: Solly e Gabby ti tengono d'occhio.</p>
       <div class="info-box"><strong>Modalità scuola</strong><br>Con <em>Nuovo Matleta</em> puoi cambiare rapidamente alunno senza cancellare i record già memorizzati per quel nome.</div>
       <div class="info-box"><strong>Prove orali</strong><br>Pitagora e le formule di poligoni e solidi si svolgono a voce: dopo “Ho risposto” compare la soluzione per l'insegnante, che assegna ✓ corretta oppure ✕ errata.</div>
+      <div class="info-box"><strong>Divisibilità</strong><br>Seleziona tutti i divisori corretti tra 2, 3, 5, 7, 11, 13 e 17. Il punteggio combina precisione e velocità; dalla Home puoi aprire la scheda CRITERI per il ripasso.</div>
       <p class="credits">Ideazione, prove e progetti Scratch originali: <strong>Flavio Naretti</strong>.<br>Trasposizione e sviluppo PWA realizzati con ChatGPT / OpenAI.</p>
       <div class="info-box"><strong>Riordino delle sezioni</strong><br>Tieni premuta una scheda nella Home e scegli davanti a quale sezione inserirla. L’ordine resta memorizzato su questo dispositivo.</div>
-      <p class="version">MATLETICA v1.5</p>
+      <p class="version">MATLETICA v1.6</p>
     </div>
   </div>
 
