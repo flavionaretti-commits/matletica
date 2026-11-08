@@ -92,3 +92,43 @@ body{min-height:100dvh;overscroll-behavior:none}button,input{font:inherit}button
   .none-hint{display:none}
   .divisibility-confirm{padding:6px 13px}
 }
+
+
+/* MATLETICA v1.7 — Numeri primi */
+.prime-list-btn{margin-top:8px;width:100%;border:1px dashed color-mix(in srgb,var(--card-color) 55%,var(--line));border-radius:10px;background:color-mix(in srgb,var(--card-color) 7%,var(--panel));color:var(--card-color);font:inherit;font-size:10px;font-weight:950;letter-spacing:.1em;padding:6px 8px;cursor:pointer}
+.prime-list-btn:hover{background:color-mix(in srgb,var(--card-color) 14%,var(--panel))}
+.prime-modal{width:min(620px,94vw)}
+.prime-reference{display:grid;grid-template-columns:repeat(6,1fr);gap:9px;margin:16px 0}
+.prime-reference span{height:48px;border-radius:14px;display:grid;place-items:center;background:color-mix(in srgb,#4f77c7 14%,var(--panel2));border:1px solid color-mix(in srgb,#4f77c7 40%,var(--line));color:#4f77c7;font-size:22px;font-weight:950}
+.prime-question-title{font-size:clamp(24px,4.5vw,46px);letter-spacing:.04em}
+.visual-area:has(.prime-game-panel){width:min(760px,86vw);height:auto;min-height:205px;margin-top:5px}
+.prime-game-panel{display:grid;place-items:center;gap:12px;width:100%}
+.prime-number-grid{display:grid;gap:9px;width:min(650px,100%);margin:auto}
+.prime-number-grid.prime-count-8{grid-template-columns:repeat(4,1fr);max-width:430px}
+.prime-number-grid.prime-count-12{grid-template-columns:repeat(6,1fr);max-width:620px}
+.prime-number-grid.prime-count-16{grid-template-columns:repeat(8,1fr);max-width:720px}
+.prime-number-chip{height:58px;border:2px solid var(--line);border-radius:15px;background:var(--panel);color:var(--ink);font:inherit;font-size:24px;font-weight:950;box-shadow:0 3px 10px rgba(0,0,0,.04);cursor:pointer;transition:transform .12s ease,border-color .12s ease,background .12s ease,opacity .12s ease}
+.prime-number-chip:hover{border-color:#4f77c7}
+.prime-number-chip:active{transform:scale(.96)}
+.prime-number-chip.selected{background:#4f77c7;border-color:#4f77c7;color:white;box-shadow:0 0 0 4px color-mix(in srgb,#4f77c7 18%,transparent)}
+.prime-number-chip.correct-selected{background:var(--green);border-color:var(--green);color:white}
+.prime-number-chip.wrong-selected{background:var(--red);border-color:var(--red);color:white}
+.prime-number-chip.missed{background:color-mix(in srgb,var(--accent) 20%,var(--panel));border:3px dashed var(--accent);color:var(--ink)}
+.prime-number-chip.neutral{opacity:.34}
+.prime-number-chip:disabled{cursor:default}
+.prime-confirm{min-width:190px}
+@media(max-width:680px){
+  .prime-reference{grid-template-columns:repeat(4,1fr)}
+  .visual-area:has(.prime-game-panel){width:min(93vw,700px);min-height:190px}
+  .prime-number-grid.prime-count-8{grid-template-columns:repeat(4,1fr)}
+  .prime-number-grid.prime-count-12{grid-template-columns:repeat(4,1fr)}
+  .prime-number-grid.prime-count-16{grid-template-columns:repeat(4,1fr)}
+  .prime-number-chip{height:48px;font-size:20px;border-radius:12px}
+}
+@media(max-height:620px){
+  .visual-area:has(.prime-game-panel){min-height:150px;margin-top:1px}
+  .prime-game-panel{gap:6px}
+  .prime-number-grid{gap:6px}
+  .prime-number-chip{height:38px;font-size:18px}
+  .prime-confirm{padding:6px 13px}
+}
