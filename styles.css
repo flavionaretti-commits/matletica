@@ -48,3 +48,47 @@ body{min-height:100dvh;overscroll-behavior:none}button,input{font:inherit}button
 .reorder-option strong{display:block;font-size:14px;line-height:1.1;margin-top:2px}
 .reorder-end{width:100%;margin-top:2px}
 @media(max-width:680px){.reorder-hint{display:none}.reorder-options{grid-template-columns:1fr}.reorder-modal{padding:18px 14px}.reorder-option{padding:7px 9px}.reorder-option-icon{width:34px;height:34px}.reorder-option strong{font-size:13px}}
+
+
+/* MATLETICA v1.6 — Divisibilità */
+.criteria-btn{margin-top:8px;width:100%;border:1px dashed color-mix(in srgb,var(--card-color) 55%,var(--line));border-radius:10px;background:color-mix(in srgb,var(--card-color) 7%,var(--panel));color:var(--card-color);font:inherit;font-size:10px;font-weight:950;letter-spacing:.1em;padding:6px 8px;cursor:pointer}
+.criteria-btn:hover{background:color-mix(in srgb,var(--card-color) 14%,var(--panel))}
+.criteria-modal{width:min(720px,95vw);max-height:min(760px,90vh);overflow:auto}
+.criteria-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;text-align:left;margin-top:14px}
+.criteria-grid>div{display:grid;grid-template-columns:44px 1fr;gap:10px;align-items:center;background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.criteria-grid strong{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:color-mix(in srgb,var(--primary) 14%,var(--panel));color:var(--primary);font-size:21px}
+.criteria-grid span{color:var(--ink);font-size:13px;line-height:1.3;font-weight:750}
+.divisibility-number{font-size:clamp(52px,10vw,96px);letter-spacing:.035em;font-variant-numeric:tabular-nums}
+.visual-area:has(.divisibility-panel){width:min(680px,82vw);height:auto;min-height:132px;margin-top:8px}
+.divisibility-panel{display:grid;place-items:center;gap:9px;width:100%}
+.divisor-help{font-size:11px;color:var(--muted);font-weight:850;text-align:center}
+.divisor-chips{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.divisor-chip{width:58px;height:52px;border:2px solid var(--line);border-radius:15px;background:var(--panel);color:var(--ink);font:inherit;font-size:23px;font-weight:950;box-shadow:0 3px 10px rgba(0,0,0,.04);cursor:pointer;transition:transform .12s ease,border-color .12s ease,background .12s ease}
+.divisor-chip:hover{border-color:var(--primary)}
+.divisor-chip:active{transform:scale(.96)}
+.divisor-chip.selected{background:var(--primary);border-color:var(--primary);color:white;box-shadow:0 0 0 4px color-mix(in srgb,var(--primary) 18%,transparent)}
+.divisor-chip.correct-selected{background:var(--green);border-color:var(--green);color:white}
+.divisor-chip.wrong-selected{background:var(--red);border-color:var(--red);color:white}
+.divisor-chip.missed{background:color-mix(in srgb,var(--accent) 20%,var(--panel));border:3px dashed var(--accent);color:var(--ink)}
+.divisor-chip.neutral{opacity:.38}
+.divisor-chip:disabled{cursor:default}
+.none-hint{font-size:10px;color:var(--muted);font-weight:800}
+.divisibility-confirm{min-width:190px;padding:10px 20px}
+.score-ring.points-mode{width:128px;height:128px}
+.score-ring.points-mode strong{font-size:31px;letter-spacing:-.04em}
+.score-ring.points-mode span{font-size:12px;margin-bottom:31px}
+@media(max-width:680px){
+  .criteria-grid{grid-template-columns:1fr}
+  .visual-area:has(.divisibility-panel){width:min(92vw,620px);min-height:122px}
+  .divisor-chips{gap:6px}
+  .divisor-chip{width:48px;height:46px;font-size:20px;border-radius:13px}
+  .divisibility-confirm{min-width:160px;padding:8px 14px}
+  .divisor-help,.none-hint{font-size:9px}
+}
+@media(max-height:620px){
+  .visual-area:has(.divisibility-panel){min-height:108px;margin-top:2px}
+  .divisibility-panel{gap:5px}
+  .divisor-chip{width:45px;height:40px;font-size:18px}
+  .none-hint{display:none}
+  .divisibility-confirm{padding:6px 13px}
+}
