@@ -581,10 +581,11 @@ function submitDivisibility(){
   if(falsePos.length)details.push(`segnati per errore: ${falsePos.join(', ')}`);
   els.solutionReveal.textContent=`Divisori corretti: ${right}. +${points} punti (precisione ${accuracy} + velocità ${bonus}).`;
   els.solutionReveal.classList.remove('hidden');
-  if(mistakes===0){els.sollyGame.src='assets/solly/vittoria.png';els.gabbyGame.src='assets/gabby/sorpresa.png';els.feedbackLine.textContent=`Perfetto! +${points} punti`;tone('good');say('Perfetto!')}
-  else{els.sollyGame.src='assets/solly/triste.png';els.gabbyGame.src='assets/gabby/triste.png';els.feedbackLine.textContent=`${details.join(' · ')} · +${points} punti`;tone('bad');say('Controlla i divisori.')}
+  const spoken=mistakes===0?'Perfetto!':'Controlla i divisori.';
+  if(mistakes===0){els.sollyGame.src='assets/solly/vittoria.png';els.gabbyGame.src='assets/gabby/sorpresa.png';els.feedbackLine.textContent=`Perfetto! +${points} punti`;tone('good')}
+  else{els.sollyGame.src='assets/solly/triste.png';els.gabbyGame.src='assets/gabby/triste.png';els.feedbackLine.textContent=`${details.join(' · ')} · +${points} punti`;tone('bad')}
   updateHUD();game.index++;
-  setTimeout(()=>nextQuestion(),mistakes===0?1500:2400);
+  advanceAfterFeedback(spoken,mistakes===0?1200:1800);
 }
 
 function togglePrimeNumber(btn){
@@ -615,19 +616,25 @@ function submitPrimeRecognition(){
   if(falsePos.length)details.push(`composti selezionati: ${falsePos.join(', ')}`);
   els.solutionReveal.textContent=`Numeri primi: ${correct.join(', ')}. +${points} punti (precisione ${accuracy} + velocità ${bonus}).`;
   els.solutionReveal.classList.remove('hidden');
-  if(mistakes===0){els.sollyGame.src='assets/solly/vittoria.png';els.gabbyGame.src='assets/gabby/sorpresa.png';els.feedbackLine.textContent=`Perfetto! +${points} punti`;tone('good');say('Perfetto!')}
-  else{els.sollyGame.src='assets/solly/triste.png';els.gabbyGame.src='assets/gabby/triste.png';els.feedbackLine.textContent=`${details.join(' · ')} · +${points} punti`;tone('bad');say('Controlla i numeri primi.')}
+  const spoken=mistakes===0?'Perfetto!':'Controlla i numeri primi.';
+  if(mistakes===0){els.sollyGame.src='assets/solly/vittoria.png';els.gabbyGame.src='assets/gabby/sorpresa.png';els.feedbackLine.textContent=`Perfetto! +${points} punti`;tone('good')}
+  else{els.sollyGame.src='assets/solly/triste.png';els.gabbyGame.src='assets/gabby/triste.png';els.feedbackLine.textContent=`${details.join(' · ')} · +${points} punti`;tone('bad')}
   updateHUD();game.index++;
-  setTimeout(()=>nextQuestion(),mistakes===0?1500:2400);
+  advanceAfterFeedback(spoken,mistakes===0?1200:1800);
 }
 
 function gradeCurrent(ok,sec){
   if(!game||game.locked||!game.questionReady)return;game.locked=true;cancelPendingQuestionStart();stopQuestionClock();clearWarnings();
   game.responseTimes.push(sec);game.speedPenalty+=speedPenaltyForWarning();
-  if(ok){game.correct++;els.sollyGame.src='assets/solly/vittoria.png';els.gabbyGame.src='assets/gabby/sorpresa.png';els.feedbackLine.textContent='Ottimo!';tone('good');say('Ottimo!')}
-  else{game.wrong++;els.sollyGame.src='assets/solly/triste.png';els.gabbyGame.src='assets/gabby/triste.png';els.feedbackLine.textContent=`Non è corretto. Risposta: ${game.question.correctText}`;tone('bad');say(game.question.teacherFormula?'Non è corretto.':`Sbagliato. La risposta giusta è ${spokenCorrect(game.question.correctText)}`)}
+  let spoken;
+  if(ok){
+    game.correct++;els.sollyGame.src='assets/solly/vittoria.png';els.gabbyGame.src='assets/gabby/sorpresa.png';els.feedbackLine.textContent='Ottimo!';tone('good');spoken='Ottimo!';
+  }else{
+    game.wrong++;els.sollyGame.src='assets/solly/triste.png';els.gabbyGame.src='assets/gabby/triste.png';els.feedbackLine.textContent=`Non è corretto. Risposta: ${game.question.correctText}`;tone('bad');
+    spoken=game.question.teacherFormula?'Non è corretto.':`Sbagliato. La risposta giusta è ${spokenCorrect(game.question.correctText)}`;
+  }
   updateHUD();game.index++;
-  setTimeout(()=>nextQuestion(),ok?650:1200);
+  advanceAfterFeedback(spoken,ok?800:1200);
 }
 function spokenCorrect(s){return String(s).replace('√','radice quadrata di ').replace('/',' fratto ')}
 function oralAnswered(){
@@ -710,6 +717,16 @@ function finishGame(){
 }
 
 function showBubble(msg,ms=1500){els.speechBubble.textContent=msg;els.speechBubble.classList.remove('hidden');setTimeout(()=>els.speechBubble.classList.add('hidden'),ms)}
+function waitMs(ms){return new Promise(resolve=>setTimeout(resolve,ms))}
+async function advanceAfterFeedback(spokenText,minVisibleMs=800){
+  const thisGame=game;
+  const expectedIndex=game?.index;
+  // Aspetta sia la fine reale della voce sia un tempo minimo di lettura del feedback.
+  await Promise.all([sayAsync(spokenText),waitMs(minVisibleMs)]);
+  await waitMs(220);
+  if(game!==thisGame||!game||game.index!==expectedIndex||!game.locked||!els.gameScreen.classList.contains('active'))return;
+  nextQuestion();
+}
 function sayAsync(text){
   if(!appState.sound||!('speechSynthesis'in window)||!text)return Promise.resolve();
   return new Promise(resolve=>{
