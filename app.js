@@ -31,6 +31,11 @@ const DISCIPLINES={
     {label:'Livello 1',range:[1,10],thresholds:[8,12,20],warningWaits:[4,8,2],speedPenalties:[0,1,3]},
     {label:'Livello 2',range:[1,20],thresholds:[8,12,20],warningWaits:[4,8,2],speedPenalties:[0,1,3]}
   ]},
+  divisibility:{title:'Divisibilità',icon:'÷',sub:'Criteri di divisibilità',color:'#c77819',levels:[
+    {label:'Facile',number:1,digits:[2],fast:5,slow:15,maxDivisors:3},
+    {label:'Medio',number:2,digits:[3],fast:8,slow:20,maxDivisors:4},
+    {label:'Difficile',number:3,digits:[4,5],fast:12,slow:30,maxDivisors:4}
+  ]},
   percent:{title:'Percentuali',icon:'%',sub:'Percentuali a mente',color:'#cf4f83',levels:[
     {label:'Livello 1',thresholds:[5,9,14],warningWaits:[4,5,2],speedPenalties:[0,1,3],p:[10,20,25,50,100,0],n:[100,1000,400,10,200,2000,4000]},
     {label:'Livello 2',thresholds:[6,14,20],warningWaits:[8,6,2],speedPenalties:[0,1,3],p:[10,20,25,50,5,30,60],n:[100,1000,400,10,200,2000,4000,150,300,1500,3000,50,500,30,60]},
@@ -67,12 +72,15 @@ const els={
   themeBtn:$('#themeBtn'),soundBtn:$('#soundBtn'),fullscreenBtn:$('#fullscreenBtn'),infoBtn:$('#infoBtn'),installBtn:$('#installBtn'),
   gameTitle:$('#gameTitle'),gameLevel:$('#gameLevel'),recordMini:$('#recordMini'),
   hudProgress:$('#hudProgress'),hudCorrect:$('#hudCorrect'),hudWrong:$('#hudWrong'),hudTime:$('#hudTime'),hudSpeed:$('#hudSpeed'),
+  hudCorrectLabel:$('#hudCorrectLabel'),hudWrongLabel:$('#hudWrongLabel'),hudSpeedLabel:$('#hudSpeedLabel'),
   sollyGame:$('#sollyGame'),gabbyGame:$('#gabbyGame'),speechBubble:$('#speechBubble'),
   questionHint:$('#questionHint'),questionText:$('#questionText'),visualArea:$('#visualArea'),solutionReveal:$('#solutionReveal'),
   answerForm:$('#answerForm'),answerInput:$('#answerInput'),oralControls:$('#oralControls'),oralAnsweredBtn:$('#oralAnsweredBtn'),teacherGrade:$('#teacherGrade'),teacherWrongBtn:$('#teacherWrongBtn'),teacherCorrectBtn:$('#teacherCorrectBtn'),feedbackLine:$('#feedbackLine'),
   athleteModal:$('#athleteModal'),athleteForm:$('#athleteForm'),athleteInput:$('#athleteInput'),cancelAthleteBtn:$('#cancelAthleteBtn'),
   confirmModal:$('#confirmModal'),confirmText:$('#confirmText'),confirmNo:$('#confirmNo'),confirmYes:$('#confirmYes'),
-  resultModal:$('#resultModal'),resultMascot:$('#resultMascot'),resultTitle:$('#resultTitle'),resultScore:$('#resultScore'),resultTime:$('#resultTime'),resultAvg:$('#resultAvg'),resultSpeed:$('#resultSpeed'),resultRecord:$('#resultRecord'),resultMessage:$('#resultMessage'),resultHomeBtn:$('#resultHomeBtn'),resultRetryBtn:$('#resultRetryBtn'),resultNextBtn:$('#resultNextBtn'),
+  resultModal:$('#resultModal'),resultMascot:$('#resultMascot'),resultTitle:$('#resultTitle'),resultScore:$('#resultScore'),resultScoreMax:$('#resultScoreMax'),resultScoreRing:$('#resultScoreRing'),resultTime:$('#resultTime'),resultAvg:$('#resultAvg'),resultSpeed:$('#resultSpeed'),resultRecord:$('#resultRecord'),resultMessage:$('#resultMessage'),resultHomeBtn:$('#resultHomeBtn'),resultRetryBtn:$('#resultRetryBtn'),resultNextBtn:$('#resultNextBtn'),
+  resultTimeLabel:$('#resultTimeLabel'),resultAvgLabel:$('#resultAvgLabel'),resultSpeedLabel:$('#resultSpeedLabel'),resultRecordLabel:$('#resultRecordLabel'),
+  criteriaModal:$('#criteriaModal'),closeCriteriaBtn:$('#closeCriteriaBtn'),
   infoModal:$('#infoModal'),closeInfoBtn:$('#closeInfoBtn'),
   reorderModal:$('#reorderModal'),reorderTitle:$('#reorderTitle'),reorderText:$('#reorderText'),reorderOptions:$('#reorderOptions'),reorderEndBtn:$('#reorderEndBtn'),closeReorderBtn:$('#closeReorderBtn')
 };
@@ -124,6 +132,28 @@ function fractionText(num,den){return den===1?String(num):`${num}/${den}`}
 function fractionHtml(num,den){return `<span class="frac"><span class="num">${num}</span><span class="den">${den}</span></span>`}
 function cleanNumber(n){return Math.abs(n-Math.round(n))<1e-10?String(Math.round(n)):String(Math.round(n*10000)/10000).replace('.',',')}
 function perfectSqrtText(n){const r=Math.sqrt(n);return Number.isInteger(r)?String(r):`√${n}`}
+const DIVISIBILITY_PRIMES=[2,3,5,7,11,13,17];
+function divisibilityFactors(n){return DIVISIBILITY_PRIMES.filter(p=>n%p===0)}
+function randomByDigits(digits){
+  const d=pick(digits),min=d===1?0:10**(d-1),max=10**d-1;
+  return randInt(min,max);
+}
+function buildDivisibilityNumber(lv,index){
+  const easy=[0,1,2,1,3,0,2,1,2,3];
+  const rich=[0,1,2,3,1,4,0,2,3,1];
+  const pattern=lv.maxDivisors>=4?rich:easy;
+  const wanted=Math.min(pattern[index%pattern.length],lv.maxDivisors||3);
+  for(let tries=0;tries<1800;tries++){
+    const n=randomByDigits(lv.digits),count=divisibilityFactors(n).length;
+    if(count===wanted)return n;
+  }
+  return randomByDigits(lv.digits);
+}
+function divisibilitySpeedBonus(sec,lv){
+  if(sec<=lv.fast)return 30;
+  if(sec>=lv.slow)return 0;
+  return Math.max(0,Math.min(30,Math.round(30*(lv.slow-sec)/(lv.slow-lv.fast))));
+}
 const POLYGON_FORMULAS={
   'triangolo scaleno':{area:'A = (b × h) / 2',perimetro:'P = a + b + c'},
   'triangolo isoscele':{area:'A = (b × h) / 2',perimetro:'P = b + 2l'},
@@ -172,10 +202,11 @@ function renderHome(){
     card.className='discipline-card';card.dataset.kind=kind;card.style.setProperty('--card-color',d.color);
     const levels=d.levels.map((lv,i)=>{
       const r=getRecord(kind,i);
-      const title=r?`Migliore: ${r.bestScore||0}/10${r.bestTime!=null?` – ${fmtTime(r.bestTime)}`:''}`:'Nessun risultato ancora';
+      const title=kind==='divisibility'?(r?.bestPoints!=null?`Record: ${r.bestPoints}/1000${r.bestTime!=null?` – ${fmtTime(r.bestTime)}`:''}`:'Nessun risultato ancora'):(r?`Migliore: ${r.bestScore||0}/10${r.bestTime!=null?` – ${fmtTime(r.bestTime)}`:''}`:'Nessun risultato ancora');
       return `<button class="level-btn ${r?'has-record':''}" data-kind="${kind}" data-level="${i}" title="${title}">L${lv.number??i+1}</button>`
     }).join('');
-    card.innerHTML=`<div class="disc-head"><div class="disc-icon">${d.icon}</div><div><div class="disc-title">${d.title}</div><div class="disc-sub">${d.sub}</div></div></div><div class="level-row">${levels}</div>`;
+    const criteria=kind==='divisibility'?'<button type="button" class="criteria-btn">CRITERI</button>':'';
+    card.innerHTML=`<div class="disc-head"><div class="disc-icon">${d.icon}</div><div><div class="disc-title">${d.title}</div><div class="disc-sub">${d.sub}</div></div></div><div class="level-row">${levels}</div>${criteria}`;
     els.grid.appendChild(card);
   });
 }
@@ -203,6 +234,8 @@ function closeReorderModal(){
   els.reorderModal.classList.add('hidden');
   reorderSourceKind=null;
 }
+function openCriteriaModal(){els.criteriaModal.classList.remove('hidden')}
+function closeCriteriaModal(){els.criteriaModal.classList.add('hidden')}
 function moveDisciplineBefore(targetKind=null){
   const source=reorderSourceKind;if(!source)return;
   const order=getDisciplineOrder().filter(k=>k!==source);
@@ -215,6 +248,7 @@ function cancelLongPress(){
   longPressStart=null;
 }
 function beginLongPress(e){
+  if(e.target.closest('.criteria-btn'))return;
   const card=e.target.closest('.discipline-card');if(!card||e.button>0)return;
   cancelLongPress();
   longPressStart={card,x:e.clientX,y:e.clientY,pointerId:e.pointerId};
@@ -286,6 +320,10 @@ function buildQuestion(kind,level){
     const n1=randInt(...lv.num),d1=randInt(...lv.den),n2=randInt(...lv.num),d2=randInt(...lv.den),r=reduceFraction(n1*n2,d1*d2);
     return {html:`<span class="frac-expression">${fractionHtml(n1,d1)}<span class="frac-op">×</span>${fractionHtml(n2,d2)}</span>`,speak:`${n1} fratto ${d1}, per ${n2} fratto ${d2}`,fractionAnswer:r,correctText:fractionText(r.num,r.den),hint:'Moltiplica e scrivi il risultato ridotto ai minimi termini'};
   }
+  if(kind==='divisibility'){
+    const n=buildDivisibilityNumber(lv,game?.index??0),divisors=divisibilityFactors(n);
+    return {html:`<span class="divisibility-number">${n.toLocaleString('it-IT')}</span>`,speak:`Seleziona tutti i divisori di ${n}`,hint:'Seleziona tutti i divisori corretti e poi premi CONFERMA',divisibility:true,number:n,divisors,correctText:divisors.length?divisors.join(', '):'nessuno'};
+  }
   if(kind==='polygonFormulas'){
     const shape=pick(lv.shapes),request=pick(['area','perimetro']),solution=POLYGON_FORMULAS[shape][request];
     const label=request==='perimetro'&&shape==='cerchio'?'circonferenza':request;
@@ -321,9 +359,14 @@ function startGame(kind,level){
   if(!appState.currentAthlete){openAthleteModal(false);return}
   cancelPendingQuestionStart();stopQuestionClock();clearWarnings();
   const d=DISCIPLINES[kind],lv=d.levels[level];
-  game={kind,level,index:0,correct:0,wrong:0,responseTimes:[],speedPenalty:0,question:null,qStart:0,locked:false,oralFrozen:null,currentWarningLevel:-1,questionReady:false};
+  game={kind,level,index:0,correct:0,wrong:0,responseTimes:[],speedPenalty:0,question:null,qStart:0,locked:false,oralFrozen:null,currentWarningLevel:-1,questionReady:false,divPoints:0,divFalsePos:0,divMissed:0,selectedDivisors:new Set()};
   els.gameTitle.textContent=d.title;els.gameLevel.textContent=lv.label;
-  const rec=getRecord(kind,level);els.recordMini.textContent=`Record: ${rec?.bestTime!=null?fmtTime(rec.bestTime):'—'}`;
+  const rec=getRecord(kind,level);
+  els.recordMini.textContent=kind==='divisibility'?`Record: ${rec?.bestPoints!=null?rec.bestPoints+'/1000':'—'}`:`Record: ${rec?.bestTime!=null?fmtTime(rec.bestTime):'—'}`;
+  const isDiv=kind==='divisibility';
+  els.hudCorrectLabel.textContent=isDiv?'PERFETTE':'CORRETTE';
+  els.hudWrongLabel.textContent='ERRORI';
+  els.hudSpeedLabel.textContent=isDiv?'PUNTI':'VELOCITÀ';
   showScreen('game');
   resetMascots();
   els.questionHint.textContent='';
@@ -340,7 +383,7 @@ function startGame(kind,level){
 }
 function introFor(kind,level){
   const n=appState.currentAthlete;
-  const map={sums:'alleniamo le somme',tables:'ripassiamo le tabelline',multiplications:'affrontiamo le moltiplicazioni',squares:'eleviamo al quadrato',gcd:'calcoliamo il Massimo Comune Divisore',lcm:'calcoliamo il minimo comune multiplo',percent:'alleniamo le percentuali',segments:'affrontiamo i problemi sui segmenti',pythagoras:'alleniamo il Teorema di Pitagora',polygonFormulas:'ripassiamo le formule dei poligoni',solidFormulas:'ripassiamo le formule dei solidi',fractionSums:'sommiamo le frazioni',fractionProducts:'moltiplichiamo le frazioni'};
+  const map={sums:'alleniamo le somme',tables:'ripassiamo le tabelline',multiplications:'affrontiamo le moltiplicazioni',squares:'eleviamo al quadrato',gcd:'calcoliamo il Massimo Comune Divisore',lcm:'calcoliamo il minimo comune multiplo',divisibility:'alleniamo i criteri di divisibilità',percent:'alleniamo le percentuali',segments:'affrontiamo i problemi sui segmenti',pythagoras:'alleniamo il Teorema di Pitagora',polygonFormulas:'ripassiamo le formule dei poligoni',solidFormulas:'ripassiamo le formule dei solidi',fractionSums:'sommiamo le frazioni',fractionProducts:'moltiplichiamo le frazioni'};
   const lv=DISCIPLINES[kind].levels[level];
   return `${n}, ${map[kind]}. Livello ${lv.number??level+1}. Iniziamo!`;
 }
@@ -356,7 +399,12 @@ function nextQuestion(){
   els.questionHint.textContent=game.question.hint||'';
   els.questionText.innerHTML=game.question.html;
   els.solutionReveal.classList.add('hidden');els.solutionReveal.textContent='';
-  if(game.question.oral){
+  if(game.question.divisibility){
+    game.selectedDivisors=new Set();
+    els.visualArea.innerHTML=`<div class="divisibility-panel"><div class="divisor-help">Seleziona tutti quelli che dividono esattamente il numero</div><div class="divisor-chips">${DIVISIBILITY_PRIMES.map(p=>`<button type="button" class="divisor-chip" data-divisor="${p}" aria-pressed="false">${p}</button>`).join('')}</div><div class="none-hint">Se non ce ne sono, non selezionare nulla.</div><button type="button" class="primary-btn divisibility-confirm">CONFERMA</button></div>`;
+    els.visualArea.classList.remove('hidden');
+    els.answerForm.classList.add('hidden');els.oralControls.classList.add('hidden');
+  }else if(game.question.oral){
     if(game.question.triangle){els.visualArea.innerHTML=triangleSvg(game.question.triangle);els.visualArea.classList.remove('hidden')}
     else{els.visualArea.classList.add('hidden');els.visualArea.innerHTML=''}
     els.answerForm.classList.add('hidden');els.oralControls.classList.remove('hidden');els.oralAnsweredBtn.classList.remove('hidden');els.teacherGrade.classList.add('hidden');
@@ -447,7 +495,8 @@ function speedPenaltyForWarning(){
 function speedScore(){return Math.max(0,10-game.speedPenalty)}
 function updateHUD(){
   if(!game)return;
-  els.hudProgress.textContent=`${Math.min(game.index+1,10)}/10`;els.hudCorrect.textContent=game.correct;els.hudWrong.textContent=game.wrong;els.hudSpeed.textContent=`${speedScore()}/10`;
+  els.hudProgress.textContent=`${Math.min(game.index+1,10)}/10`;els.hudCorrect.textContent=game.correct;els.hudWrong.textContent=game.wrong;
+  els.hudSpeed.textContent=game.kind==='divisibility'?`${game.divPoints}/1000`:`${speedScore()}/10`;
 }
 function parseAutomaticAnswer(raw,q){
   const s=raw.trim();if(!s)return false;
@@ -464,10 +513,45 @@ function parseAutomaticAnswer(raw,q){
   const n=Number(s.replace(',','.'));if(!Number.isFinite(n))return false;return Math.abs(n-q.answer)<1e-9;
 }
 function submitAutomatic(){
-  if(!game||game.locked||!game.questionReady||game.question.oral)return;
+  if(!game||game.locked||!game.questionReady||game.question.oral||game.question.divisibility)return;
   const raw=els.answerInput.value;if(!raw.trim())return;
   const ok=parseAutomaticAnswer(raw,game.question);gradeCurrent(ok,elapsed());
 }
+function toggleDivisorButton(btn){
+  if(!game||game.locked||!game.questionReady||!game.question?.divisibility)return;
+  const p=Number(btn.dataset.divisor);
+  if(game.selectedDivisors.has(p)){game.selectedDivisors.delete(p);btn.classList.remove('selected');btn.setAttribute('aria-pressed','false')}
+  else{game.selectedDivisors.add(p);btn.classList.add('selected');btn.setAttribute('aria-pressed','true')}
+}
+function submitDivisibility(){
+  if(!game||game.locked||!game.questionReady||!game.question?.divisibility)return;
+  const sec=elapsed(),lv=DISCIPLINES.divisibility.levels[game.level],correct=game.question.divisors,selected=[...game.selectedDivisors];
+  const falsePos=selected.filter(p=>!correct.includes(p)),missed=correct.filter(p=>!selected.includes(p)),mistakes=falsePos.length+missed.length;
+  const accuracy=Math.max(0,70-30*mistakes),bonus=divisibilitySpeedBonus(sec,lv),points=accuracy+bonus;
+  game.locked=true;cancelPendingQuestionStart();stopQuestionClock();clearWarnings();game.responseTimes.push(sec);
+  game.divPoints+=points;game.divFalsePos+=falsePos.length;game.divMissed+=missed.length;
+  if(mistakes===0)game.correct++;else game.wrong+=mistakes;
+  els.visualArea.querySelectorAll('.divisor-chip').forEach(btn=>{
+    const p=Number(btn.dataset.divisor),was=selected.includes(p),is=correct.includes(p);
+    btn.disabled=true;btn.classList.remove('selected');
+    if(was&&is)btn.classList.add('correct-selected');
+    else if(was&&!is)btn.classList.add('wrong-selected');
+    else if(!was&&is)btn.classList.add('missed');
+    else btn.classList.add('neutral');
+  });
+  const confirm=els.visualArea.querySelector('.divisibility-confirm');if(confirm)confirm.disabled=true;
+  const right=correct.length?correct.join(', '):'nessuno';
+  const details=[];
+  if(missed.length)details.push(`dimenticati: ${missed.join(', ')}`);
+  if(falsePos.length)details.push(`segnati per errore: ${falsePos.join(', ')}`);
+  els.solutionReveal.textContent=`Divisori corretti: ${right}. +${points} punti (precisione ${accuracy} + velocità ${bonus}).`;
+  els.solutionReveal.classList.remove('hidden');
+  if(mistakes===0){els.sollyGame.src='assets/solly/vittoria.png';els.gabbyGame.src='assets/gabby/sorpresa.png';els.feedbackLine.textContent=`Perfetto! +${points} punti`;tone('good');say('Perfetto!')}
+  else{els.sollyGame.src='assets/solly/triste.png';els.gabbyGame.src='assets/gabby/triste.png';els.feedbackLine.textContent=`${details.join(' · ')} · +${points} punti`;tone('bad');say('Controlla i divisori.')}
+  updateHUD();game.index++;
+  setTimeout(()=>nextQuestion(),mistakes===0?1500:2400);
+}
+
 function gradeCurrent(ok,sec){
   if(!game||game.locked||!game.questionReady)return;game.locked=true;cancelPendingQuestionStart();stopQuestionClock();clearWarnings();
   game.responseTimes.push(sec);game.speedPenalty+=speedPenaltyForWarning();
@@ -486,8 +570,37 @@ function oralAnswered(){
   if(!game.question.teacherFormula)say(`La risposta giusta era ${spokenCorrect(game.question.correctText)}`);
 }
 
+function configureResultMode(pointsMode){
+  els.resultScoreMax.textContent=pointsMode?'/1000':'/10';
+  els.resultScoreRing.classList.toggle('points-mode',pointsMode);
+  els.resultTimeLabel.textContent='Tempo totale';
+  els.resultAvgLabel.textContent=pointsMode?'Media / numero':'Media / risposta';
+  els.resultSpeedLabel.textContent=pointsMode?'Errori totali':'Velocità';
+  els.resultRecordLabel.textContent='Record personale';
+}
+function finishDivisibility(){
+  cancelPendingQuestionStart();stopQuestionClock();clearWarnings();configureResultMode(true);
+  const total=game.responseTimes.reduce((a,b)=>a+b,0),avg=total/(game.responseTimes.length||1),points=game.divPoints,errors=game.divFalsePos+game.divMissed;
+  const data=athleteData(),key=recKey(game.kind,game.level);let rec=data.records[key]||{bestPoints:0,bestTime:null};
+  let newRecord=false;
+  if(points>(rec.bestPoints||0)||(points===(rec.bestPoints||0)&&(rec.bestTime==null||total<rec.bestTime))){
+    rec.bestPoints=points;rec.bestTime=total;rec.bestAvg=avg;rec.date=new Date().toISOString();newRecord=true;
+  }
+  data.records[key]=rec;
+  data.history.unshift({kind:game.kind,level:game.level,points,perfect:game.correct,falsePos:game.divFalsePos,missed:game.divMissed,total,at:new Date().toISOString()});data.history=data.history.slice(0,80);saveState();
+  const passed=points>=850;
+  els.resultScore.textContent=points;els.resultTime.textContent=fmtTime(total);els.resultAvg.textContent=fmtTime(avg);els.resultSpeed.textContent=errors;els.resultRecord.textContent=`${rec.bestPoints||0}/1000`;
+  els.resultMascot.src=points>=900?'assets/solly/vittoria.png':points>=700?'assets/solly/sorpreso.png':'assets/solly/triste.png';
+  els.resultTitle.textContent=newRecord?'Nuovo record!':passed?'Prova superata!':'Continua ad allenarti!';
+  els.resultMessage.textContent=`Risposte perfette: ${game.correct}/10 · divisori dimenticati: ${game.divMissed} · divisori segnati per errore: ${game.divFalsePos}.`;
+  if(passed)tone('win');
+  const hasNext=game.level<DISCIPLINES[game.kind].levels.length-1;
+  els.resultNextBtn.classList.toggle('hidden',!(passed&&hasNext));
+  els.resultModal.classList.remove('hidden');renderHome();
+}
 function finishGame(){
-  cancelPendingQuestionStart();stopQuestionClock();clearWarnings();
+  if(game?.kind==='divisibility'){finishDivisibility();return}
+  cancelPendingQuestionStart();stopQuestionClock();clearWarnings();configureResultMode(false);
   const total=game.responseTimes.reduce((a,b)=>a+b,0),avg=total/(game.responseTimes.length||1),score=game.correct,speed=speedScore();
   const data=athleteData(),key=recKey(game.kind,game.level);let rec=data.records[key]||{bestScore:0,bestTime:null,bestAvg:null,bestSpeed:0};
   rec.bestScore=Math.max(rec.bestScore||0,score);rec.bestSpeed=Math.max(rec.bestSpeed||0,speed);
@@ -535,7 +648,7 @@ function toggleTheme(){appState.theme=appState.theme==='dark'?'light':'dark';sav
 function toggleSound(){appState.sound=!appState.sound;saveState();updateSound();if(!appState.sound)speechSynthesis?.cancel?.();else tone('good')}
 async function toggleFullscreen(){try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen();else await document.exitFullscreen()}catch{}}
 
-els.grid.addEventListener('click',e=>{if(Date.now()<suppressLevelClickUntil)return;const b=e.target.closest('.level-btn');if(b)startGame(b.dataset.kind,Number(b.dataset.level))});
+els.grid.addEventListener('click',e=>{if(Date.now()<suppressLevelClickUntil)return;const c=e.target.closest('.criteria-btn');if(c){openCriteriaModal();return}const b=e.target.closest('.level-btn');if(b)startGame(b.dataset.kind,Number(b.dataset.level))});
 els.grid.addEventListener('pointerdown',beginLongPress);
 els.grid.addEventListener('pointermove',trackLongPress);
 els.grid.addEventListener('pointerup',cancelLongPress);
@@ -547,6 +660,7 @@ els.reorderEndBtn.addEventListener('click',()=>moveDisciplineBefore(null));
 els.closeReorderBtn.addEventListener('click',closeReorderModal);
 els.reorderModal.addEventListener('click',e=>{if(e.target===els.reorderModal)closeReorderModal()});
 els.answerForm.addEventListener('submit',e=>{e.preventDefault();submitAutomatic()});
+els.visualArea.addEventListener('click',e=>{const chip=e.target.closest('.divisor-chip');if(chip){toggleDivisorButton(chip);return}if(e.target.closest('.divisibility-confirm'))submitDivisibility()});
 els.oralAnsweredBtn.addEventListener('click',oralAnswered);
 els.teacherCorrectBtn.addEventListener('click',()=>gradeCurrent(true,game?.oralFrozen??elapsed()));
 els.teacherWrongBtn.addEventListener('click',()=>gradeCurrent(false,game?.oralFrozen??elapsed()));
@@ -554,6 +668,7 @@ els.teacherWrongBtn.addEventListener('click',()=>gradeCurrent(false,game?.oralFr
 [els.homeBtn,els.backBtn].forEach(b=>b.addEventListener('click',()=>showScreen('home')));
 els.themeBtn.addEventListener('click',toggleTheme);els.soundBtn.addEventListener('click',toggleSound);els.fullscreenBtn.addEventListener('click',toggleFullscreen);
 els.infoBtn.addEventListener('click',()=>els.infoModal.classList.remove('hidden'));els.closeInfoBtn.addEventListener('click',()=>els.infoModal.classList.add('hidden'));
+els.closeCriteriaBtn.addEventListener('click',closeCriteriaModal);els.criteriaModal.addEventListener('click',e=>{if(e.target===els.criteriaModal)closeCriteriaModal()});
 els.infoModal.addEventListener('click',e=>{if(e.target===els.infoModal)els.infoModal.classList.add('hidden')});
 els.athleteBtn.addEventListener('click',()=>{
   if(!appState.currentAthlete){openAthleteModal(false);return}
